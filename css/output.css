@@ -1,0 +1,171 @@
+:root {
+    --bg-color: #ffffff;
+    --font-color: #000000;
+    /* highest contrast colors
+    for light and dark themes */
+    --red: #ec0000;
+    --green: #008900;
+    --blue: #5f5fff;
+    --gray: #757575;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* change to dark theme */
+        --bg-color: #000000;
+        --font-color: #ffffff;
+    }
+}
+
+*:not(li, progress, span) {
+    border-radius: 5px;
+    /* no overflowing body */
+    max-width: 100%;
+    overflow: auto;
+}
+
+*:disabled {
+    cursor: not-allowed !important;
+}
+
+[href],
+dfn {
+    /* no visited color */
+    color: var(--blue);
+}
+
+[href]:hover {
+    text-decoration: none;
+}
+
+[href^="mailto:"]::before {
+    content: "📧 ";
+}
+
+abbr {
+    cursor: help;
+}
+
+abbr,
+var {
+    color: var(--red);
+}
+
+blockquote {
+    /* add bar before quote */
+    border-left: 0.3em solid var(--gray);
+    padding-left: 1em;
+}
+
+body {
+    /* high contrast */
+    background: var(--bg-color);
+    color: var(--font-color);
+    /* most readable wed-safe font */
+    font-family: Helvetica;
+    /* 12pt is minimum */
+    font-size: 14pt;
+    /* required with justified text */
+    hyphens: auto;
+    /* experimental:
+    highest quality images */
+    image-rendering: high-quality;
+    /* 1.5 is minimum */
+    line-height: 1.6;
+    /* center body in page */
+    margin: auto;
+    /* space inside body */
+    padding: 0 1em;
+    /* each line is similar length */
+    text-align: justify;
+    /* browser focuses on readability */
+    text-rendering: optimizeLegibility;
+    /* line length of 60 characters
+    (between recommended 45-80)
+    & subtract the padding */
+    width: min(60ch, calc(100% - 2em));
+}
+
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+    border: 1px solid var(--gray);
+    /* appear clickable */
+    cursor: pointer;
+}
+
+button:hover,
+input[type="button"]:hover,
+input[type="reset"]:hover,
+input[type="submit"]:hover {
+    /* make border blend into background */
+    border: 1px solid var(--bg-color);
+}
+
+code {
+    /* classic green code */
+    color: var(--green);
+}
+
+figure {
+    /* center caption under image */
+    text-align: center;
+}
+
+footer,
+header {
+    margin-top: 1em;
+    text-align: center;
+}
+
+html {
+    /* better for jump scrolling */
+    scroll-behavior: smooth;
+}
+
+iframe {
+    /* common screen ratio */
+    aspect-ratio: 3/2;
+    /* keep from overflowing */
+    width: 99%;
+}
+
+kbd {
+    /* appear like a key */
+    box-shadow: 1px 1px 2px 1px;
+}
+
+nav {
+    display: flex;
+    /* space links apart */
+    justify-content: space-around;
+}
+
+small {
+    /* decrease visibility */
+    color: var(--gray);
+}
+
+summary {
+    /* indicate interaction */
+    cursor: pointer;
+    font-weight: bold;
+}
+
+table {
+    /* multiple borders merge */
+    border-collapse: collapse;
+    display: block;
+}
+
+tbody>tr:nth-child(odd) {
+    /* set background of odd cells */
+    background: var(--gray);
+}
+
+td,
+th {
+    border: 1px solid;
+    border-collapse: collapse;
+}

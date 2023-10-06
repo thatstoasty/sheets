@@ -2,12 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	// "fmt"
 	// "log"
+	// "strings"
 
-	// "github.com/BurntSushi/toml"
 	// "gorm.io/driver/sqlite"
 	// "gorm.io/gorm"
 
+	// "github.com/BurntSushi/toml"
 	"github.com/thatstoasty/character-sheet-ui/pkg/server"
 )
 
@@ -20,96 +22,130 @@ func convertJSONString(jsonString string, targetObj any) {
 
 func main() {
 	// connect
-	// db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	// // db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	// // db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+	// db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	// if err != nil {
 	// 	log.Fatal("failed to connect database")
 	// }
 
-	// // Migrate the schema
-	// db.AutoMigrate(&server.Class{})
-	// db.AutoMigrate(&server.ClassFeature{})
-	// db.AutoMigrate(&server.Race{})
-	// db.AutoMigrate(&server.Feat{})
-	// db.AutoMigrate(&server.Item{})
-	// db.AutoMigrate(&server.Option{})
+	// // // Migrate the schema
+	// // db.AutoMigrate(&server.Class{})
+	// // db.AutoMigrate(&server.ClassFeature{})
+	// // db.AutoMigrate(&server.Race{})
+	// // db.AutoMigrate(&server.Feat{})
+	// // db.AutoMigrate(&server.Item{})
+	// // db.AutoMigrate(&server.Option{})
 	// db.AutoMigrate(&server.Character{})
 
-	// // Create
-	// db.Create(&server.Class{Name: "Fighter"})
+	// // // Create
+	// // db.Create(&server.Class{Name: "Fighter"})
 
-	// // Read
-	// var class server.Class
-	// db.First(&server.Class, 1)                     // find product with integer primary key
-	// db.First(&server.Class, "name = ?", "Fighter") // find product with code D42
-	// log.Println(class)
+	// // // Read
+	// // var class server.Class
+	// // db.First(&server.Class, 1)                     // find product with integer primary key
+	// // db.First(&server.Class, "name = ?", "Fighter") // find product with code D42
+	// // log.Println(class)
 
-	// // Delete - delete product
-	// db.Delete(&server.Class, 1)
+	// // // Delete - delete product
+	// // db.Delete(&server.Class, 1)
 
-	// // Create classes
-	// db.Create(&server.Class{Name: "Artificer"})
-	// db.Create(&server.Class{Name: "Barbarian"})
-	// db.Create(&server.Class{Name: "Bard"})
-	// db.Create(&server.Class{Name: "Cleric"})
-	// db.Create(&server.Class{Name: "Druid"})
-	// db.Create(&server.Class{Name: "Fighter"})
-	// db.Create(&server.Class{Name: "Monk"})
-	// db.Create(&server.Class{Name: "Paladin"})
-	// db.Create(&server.Class{Name: "Ranger"})
-	// db.Create(&server.Class{Name: "Rogue"})
-	// db.Create(&server.Class{Name: "Sorcerer"})
-	// db.Create(&server.Class{Name: "Warlock"})
-	// db.Create(&server.Class{Name: "Wizard"})
+	// // // Create classes
+	// // db.Create(&server.Class{Name: "Artificer"})
+	// // db.Create(&server.Class{Name: "Barbarian"})
+	// // db.Create(&server.Class{Name: "Bard"})
+	// // db.Create(&server.Class{Name: "Cleric"})
+	// // db.Create(&server.Class{Name: "Druid"})
+	// // db.Create(&server.Class{Name: "Fighter"})
+	// // db.Create(&server.Class{Name: "Monk"})
+	// // db.Create(&server.Class{Name: "Paladin"})
+	// // db.Create(&server.Class{Name: "Ranger"})
+	// // db.Create(&server.Class{Name: "Rogue"})
+	// // db.Create(&server.Class{Name: "Sorcerer"})
+	// // db.Create(&server.Class{Name: "Warlock"})
+	// // db.Create(&server.Class{Name: "Wizard"})
 
-	// var classes []server.Class
-	// _ = db.Find(&server.Classes)
+	// // var classes []server.Class
+	// // _ = db.Find(&server.Classes)
 
-	// log.Println(classes)
+	// // log.Println(classes)
 
-	// // Create Races
-	// db.Create(&server.Race{Name: "Dwarf", Options: `["Darkvision"]`})
+	// // // Create Races
+	// // db.Create(&server.Race{Name: "Dwarf", Options: `["Darkvision"]`})
 
-	// // Create Feats
-	// db.Create(&server.Feat{Name: "Warcaster", Options: `["Cast War"]`})
-	// db.Create(&server.Feat{Name: "Polearm Master", Options: `["Polearm Master Extra Attack"]`})
+	// // // Create Feats
+	// // db.Create(&server.Feat{Name: "Warcaster", Options: `["Cast War"]`})
+	// // db.Create(&server.Feat{Name: "Polearm Master", Options: `["Polearm Master Extra Attack"]`})
 
-	// // Create Items
-	// db.Create(&server.Feat{Name: "Rapier", Options: ""})
+	// // // Create Items
+	// // db.Create(&server.Feat{Name: "Rapier", Options: ""})
 
-	// // Create Actions
-	// db.Create(&server.Option{Name: "Cast War", Type: "Action"})
+	// // // Create Actions
+	// // db.Create(&server.Option{Name: "Cast War", Type: "Action"})
 
-	// // Create Bonus Actions
-	// db.Create(&server.Option{Name: "Polearm Master Extra Attack", Type: "Action"})
+	// // // Create Bonus Actions
+	// // db.Create(&server.Option{Name: "Polearm Master Extra Attack", Type: "Action"})
 
-	// // Create Passives
-	// db.Create(&server.Option{Name: "Darkvision", Type: "Action"})
+	// // // Create Passives
+	// // db.Create(&server.Option{Name: "Darkvision", Type: "Action"})
 
-	// // var options []Option
-	// // _ = db.Find(&server.Options)
+	// // // var options []Option
+	// // // _ = db.Find(&server.Options)
 
-	// // log.Println(options)
+	// // // log.Println(options)
 
-	// // var hero Character
-	// // _, err = toml.DecodeFile("character.toml", &hero)
-	// // if err != nil {
-	// //     log.Println(err)
-	// //     return
+	// var hero server.Config
+	// _, err = toml.DecodeFile("character.toml", &hero)
+	// if err != nil {
+	//     panic(err)
+	// }
+	// log.Println(hero)
+
+	// character := server.Character{
+	// 	Name: hero.Name,
+	// 	Class: fmt.Sprintf("%+v", hero.Class),
+	// 	Race: hero.Race,
+	// 	Feats: fmt.Sprintf("%+v", hero.Feats),
+	// 	Items: fmt.Sprintf("%+v", hero.Items),
+	// }
+	// // character := server.Character{
+	// // 	Name: hero.Name,
+	// // 	Class: "[Paladin 1]",
+	// // 	Race: hero.Race,
+	// // 	Feats: `["Warcaster"]`,
+	// // 	Items: `["Rapier"]`,
 	// // }
-	// // log.Println(hero)
+	// // character := server.Character{
+	// // 	Name:  "Mikhail",
+	// // 	Class: `[{"Class": "Paladin", "Level": 1}]`,
+	// // 	Race:  "Dwarf",
+	// // 	Feats: `["Warcaster"]`,
+	// // 	Items: `["Rapier"]`,
+	// // }
+	// log.Println(character)
+	// // log.Println(server.Character{
+	// // 		Name:  "Mikhail",
+	// // 		Class: `[{"Class": "Paladin", "Level": 1}]`,
+	// // 		Race:  "Dwarf",
+	// // 		Feats: `["Warcaster"]`,
+	// // 		Items: `["Rapier"]`,
+	// // 	})
+	// db.Create(&character)
 
 	// // Create Character
-	// db.Create(&server.Character{
-	// 	Name:  "Mikhail",
-	// 	Class: `[{"Class": "Paladin", "Level": 1}]`,
-	// 	Race:  "Dwarf",
-	// 	Feats: `["Warcaster"]`,
-	// 	Items: `["Rapier"]`,
-	// })
+	// // db.Create(&server.Character{
+	// // 	Name:  "Mikhail",
+	// // 	Class: `[{"Class": "Paladin", "Level": 1}]`,
+	// // 	Race:  "Dwarf",
+	// // 	Feats: `["Warcaster"]`,
+	// // 	Items: `["Rapier"]`,
+	// // })
 
-	// var character server.Character
-	// db.First(&server.Character, "name = ?", "Mikhail")
+	// var char server.Character
+	// db.First(&char, "name = ?", "Mikhail")
+	// log.Println(char)
+
+	// feats := strings.Split(char.Feats, ",")
+	// log.Println(feats)
 
 	// log.Println(character)
 	// var raceOptions server.Race

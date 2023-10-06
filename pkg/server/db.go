@@ -65,7 +65,7 @@ func SetupDB() {
 	db.Create(&Feat{Name: "Polearm Master", Options: `["Polearm Master Extra Attack"]`})
 
 	// Create Items
-	db.Create(&Feat{Name: "Rapier", Options: ""})
+	db.Create(&Item{Name: "Rapier", Options: ""})
 
 	// Create Actions
 	db.Create(&Option{Name: "Cast War", Type: "Action"})
@@ -74,7 +74,7 @@ func SetupDB() {
 	db.Create(&Option{Name: "Polearm Master Extra Attack", Type: "Action"})
 
 	// Create Passives
-	db.Create(&Option{Name: "Darkvision", Type: "Action"})
+	db.Create(&Option{Name: "Darkvision", Type: "Passive"})
 
 	// // var options []Option
 	// // _ = db.Find(&Options)
@@ -89,7 +89,7 @@ func SetupDB() {
 	// // }
 	// // log.Println(hero)
 
-	// // Create Character
+	// Create Character
 	// db.Create(&Character{
 	// 	Name:  "Mikhail",
 	// 	Class: `[{"Class": "Paladin", "Level": 1}]`,

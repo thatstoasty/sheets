@@ -1,8 +1,5 @@
 Name = "Mikhail"
 Race = "Dwarf"
-Feats = ["Warcaster"]
-Items = ["Rapier"]
-
-[[Class]]
-Class = "Paladin"
-Level = 1
+Feats = "Warcaster,Polearm Master"
+Items = "Rapier"
+Class = "Paladin 1"

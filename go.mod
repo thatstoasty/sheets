@@ -3,6 +3,7 @@ module github.com/thatstoasty/character-sheet-ui
 go 1.21.1
 
 require (
+	github.com/BurntSushi/toml v1.3.2
 	github.com/labstack/echo/v4 v4.11.1
 	gorm.io/driver/sqlite v1.5.3
 	gorm.io/gorm v1.25.4

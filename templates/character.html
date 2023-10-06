@@ -1,0 +1,16 @@
+{{define "character"}}
+<table>
+    <tbody id="table-actions" style="display: inline-block;">
+        <th>Actions</th>
+        {{range .Actions}} {{ template "row.html". }} {{end}}
+    </tbody>
+    <tbody id="table-bonus" style="display: inline-block;">
+        <th>Bonus Actions</th>
+        {{range .BonusActions}} {{ template "row.html". }} {{end}}
+    </tbody>
+    <tbody id="table-passives" style="display: inline-block;">
+        <th>Passives</th>
+        {{range .Passives}} {{ template "row.html". }} {{end}}
+    </tbody>
+</table>
+{{end}}

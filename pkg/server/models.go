@@ -69,6 +69,14 @@ type Character struct {
 	Items string
 }
 
+type Config struct {
+	Name  string
+	Class string
+	Race  string
+	Feats string
+	Items string
+}
+
 // type Spell struct {
 // 	ID  		uint32 `gorm:"primaryKey,autoIncrement"`
 // 	Name	 	string

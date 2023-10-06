@@ -1,0 +1,33 @@
+{{define "index"}}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <link href=”https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css” rel=”stylesheet”>
+    <link href="/css/output.css" rel="stylesheet" />
+    <title>DND Character Sheet</title>
+  </head>
+  <body>
+    <main>
+      <div>
+        <h1>D&D Character Sheet</h1>
+        <br />
+        <span>Your Character</span>
+        <div>
+          <form
+            hx-encoding="multipart/form-data"
+            hx-post="/character"
+            hx-swap="outerHTML"
+          >
+            <input type="file" name="file" />
+            <button>Upload Your Character</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+{{end}}
