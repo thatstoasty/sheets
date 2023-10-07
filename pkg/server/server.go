@@ -44,13 +44,11 @@ func SubmitCharacter(c echo.Context) error {
 	if err != nil {
 		panic(err)
 	}
-	log.Println(fileHeader)
 
 	file, err := fileHeader.Open()
 	if err != nil {
 		panic(err)
 	}
-	log.Println(file)
 	defer file.Close()
 
 	var hero Character
@@ -59,13 +57,8 @@ func SubmitCharacter(c echo.Context) error {
 	if err != nil {
 		panic(err)
 	}
-	// _, err = toml.DecodeFile("character.toml", &hero)
-	// if err != nil {
-	//     panic(err)
-	// }
-	log.Println(hero)
 
-	db.Create(&Character{
+	db.Save(&Character{
 		Name:  hero.Name,
 		Class: hero.Class,
 		Race:  hero.Race,
@@ -77,51 +70,35 @@ func SubmitCharacter(c echo.Context) error {
 	db.First(&character, "name = ?", "Mikhail")
 	log.Println(character)
 
-	var raceOptions Race
-	_ = db.First(&raceOptions, "name = ?", character.Race)
+	var raceRecords Race
+	_ = db.First(&raceRecords, "name = ?", character.Race)
 
-	log.Println(character)
 	items := strings.Split(character.Items, ",")
-	var itemOptions Item
-	_ = db.First(&itemOptions, "name = ?", items[0])
+	var itemRecords []Item
+	_ = db.Find(&itemRecords, "name in ?", items)
 
 	feats := strings.Split(character.Feats, ",")
-	var featOptions Feat
-	_ = db.First(&featOptions, "name = ?", feats[0])
+	fmt.Printf("feat actions %v", feats)
+	var featRecords []Feat
+	_ = db.Find(&featRecords, "name in ?", feats)
 
-	var featsOptions []Feat
-	_ = db.Find(&featsOptions)
-	log.Println(featsOptions)
-
-	log.Println(raceOptions.Options)
-	log.Println(itemOptions.Options)
-	log.Println(featOptions.Options)
-
-	var raceOpt []string
-	err = json.Unmarshal([]byte(raceOptions.Options), &raceOpt)
-	if err != nil {
-		panic(err)
-	}
-	log.Println(raceOpt[0])
-
-	// var itemOpt []string
-	// err = json.Unmarshal([]byte(itemOptions.Options), &itemOpt)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// log.Println(itemOpt)
-
-	var featOpt []string
-	err = json.Unmarshal([]byte(featOptions.Options), &featOpt)
-	if err != nil {
-		panic(err)
-	}
-	log.Println(featOpt[0])
+	log.Println(raceRecords.Options)
+	log.Println(itemRecords)
+	log.Println(featRecords)
 
 	var options []string
-	options = append(options, raceOpt...)
-	// options = append(options, itemOpt...)
-	options = append(options, featOpt...)
+	raceOptions := strings.Split(raceRecords.Options, "|")
+	options = append(options, raceOptions...)
+
+	for _, feat := range featRecords {
+		featOptions := strings.Split(feat.Options, "|")
+		options = append(options, featOptions...)
+	}
+
+	for _, item := range itemRecords {
+		itemOptions := strings.Split(item.Options, "|")
+		options = append(options, itemOptions...)
+	}
 
 	log.Println(options)
 
@@ -148,7 +125,6 @@ func SubmitCharacter(c echo.Context) error {
 	log.Println(bonusActions)
 	log.Println(passives)
 
-	// return c.HTML(http.StatusOK, response)
 	finalOpt := Options{Actions: actions, BonusActions: bonusActions, Passives: passives}
 	log.Println(finalOpt)
 	return c.Render(http.StatusOK, "character", finalOpt)

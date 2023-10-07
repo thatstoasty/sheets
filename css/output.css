@@ -12,8 +12,8 @@
 @media (prefers-color-scheme: dark) {
     :root {
         /* change to dark theme */
-        --bg-color: #000000;
-        --font-color: #ffffff;
+        --bg-color: #ffffff;
+        --font-color: #000000;
     }
 }
 
@@ -62,7 +62,7 @@ body {
     background: var(--bg-color);
     color: var(--font-color);
     /* most readable wed-safe font */
-    font-family: Helvetica;
+    font-family: 'Pixelify Sans';
     /* 12pt is minimum */
     font-size: 14pt;
     /* required with justified text */
@@ -154,18 +154,27 @@ summary {
 }
 
 table {
-    /* multiple borders merge */
     border-collapse: collapse;
-    display: block;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #ddd;
+  }
+
+th, td {
+    padding: 0.25rem;
+    text-align: left;
+    border: 1px solid #ccc;
 }
 
-tbody>tr:nth-child(odd) {
-    /* set background of odd cells */
-    background: var(--gray);
+tbody tr:nth-child(odd) {
+    background: #eee;
 }
 
-td,
-th {
-    border: 1px solid;
-    border-collapse: collapse;
+.row {
+    display: flex;
+  }
+
+.column {
+    flex: 33%;
+    padding: 5px;
 }

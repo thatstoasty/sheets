@@ -4,54 +4,45 @@ type Metadata struct {
 }
 
 type Option struct {
-	ID   uint32 `gorm:"primaryKey,autoIncrement"`
-	Name string
+	Name string `gorm:"primaryKey"`
 	Type string
 }
 
 type Action struct {
-	ID   uint32 `gorm:"primaryKey,autoIncrement"`
-	Name string
+	Name string `gorm:"primaryKey"`
 }
 
 type BonusAction struct {
-	ID   uint32 `gorm:"primaryKey,autoIncrement"`
-	Name string
+	Name string `gorm:"primaryKey"`
 }
 
 type Passive struct {
-	ID   uint32 `gorm:"primaryKey,autoIncrement"`
-	Name string
+	Name string `gorm:"primaryKey"`
 }
 
 type Class struct {
-	ID   uint32 `gorm:"primaryKey,autoIncrement"`
-	Name string
+	Name string `gorm:"primaryKey"`
 }
 
 type ClassFeature struct {
-	ID      uint32 `gorm:"primaryKey,autoIncrement"`
-	Name    string
+	Name    string `gorm:"primaryKey"`
 	Class   string
 	Level   uint32
 	Options string
 }
 
 type Race struct {
-	ID      uint32 `gorm:"primaryKey,autoIncrement"`
-	Name    string
+	Name    string `gorm:"primaryKey"`
 	Options string
 }
 
 type Feat struct {
-	ID      uint32 `gorm:"primaryKey,autoIncrement"`
-	Name    string
+	Name    string `gorm:"primaryKey"`
 	Options string
 }
 
 type Item struct {
-	ID      uint32 `gorm:"primaryKey,autoIncrement"`
-	Name    string
+	Name    string `gorm:"primaryKey"`
 	Options string
 }
 
@@ -61,8 +52,7 @@ type ClassLevel struct {
 }
 
 type Character struct {
-	ID    uint32 `gorm:"primaryKey,autoIncrement"`
-	Name  string
+	Name  string `gorm:"primaryKey"`
 	Class string
 	Race  string
 	Feats string
