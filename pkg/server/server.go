@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -17,8 +16,66 @@ import (
 	"gorm.io/gorm"
 )
 
+type Options struct {
+	Actions      []string `json:"actions"`
+	BonusActions []string `json:"bonus_actions"`
+	Passives     []string `json:"passives"`
+}
+
 func GetIndex(c echo.Context) error {
 	return c.Render(http.StatusOK, "index", nil)
+}
+
+func getCharacterOptions(db *gorm.DB, name string) Options {
+	var character Character
+	db.First(&character, "name = ?", name)
+
+	var raceRecords Race
+	_ = db.First(&raceRecords, "name = ?", character.Race)
+
+	items := strings.Split(character.Items, ",")
+	var itemRecords []Item
+	_ = db.Find(&itemRecords, "name in ?", items)
+
+	feats := strings.Split(character.Feats, ",")
+	var featRecords []Feat
+	_ = db.Find(&featRecords, "name in ?", feats)
+
+	var options []string
+	raceOptions := strings.Split(raceRecords.Options, "|")
+	options = append(options, raceOptions...)
+
+	for _, feat := range featRecords {
+		featOptions := strings.Split(feat.Options, "|")
+		options = append(options, featOptions...)
+	}
+
+	for _, item := range itemRecords {
+		itemOptions := strings.Split(item.Options, "|")
+		options = append(options, itemOptions...)
+	}
+
+	var optionRecords []Option
+	_ = db.Find(&optionRecords, "name in ?", options)
+
+	var actions []string
+	var bonusActions []string
+	var passives []string
+
+	for _, opt := range optionRecords {
+		switch {
+		case opt.Type == "Action":
+			actions = append(actions, opt.Name)
+		case opt.Type == "BonusAction":
+			bonusActions = append(bonusActions, opt.Name)
+		case opt.Type == "Passive":
+			passives = append(passives, opt.Name)
+		}
+	}
+
+	finalOpt := Options{Actions: actions, BonusActions: bonusActions, Passives: passives}
+
+	return finalOpt
 }
 
 func GetCharacter(c echo.Context) error {
@@ -27,11 +84,9 @@ func GetCharacter(c echo.Context) error {
 		log.Fatal("failed to connect database")
 	}
 
-	var character Character
-	log.Println(c.Param("name"))
-	db.First(&character, "name = ?", c.Param("name"))
+	finalOpt := getCharacterOptions(db, c.Param("name"))
 
-	return c.JSON(http.StatusOK, character)
+	return c.Render(http.StatusOK, "character", finalOpt)
 }
 
 func SubmitCharacter(c echo.Context) error {
@@ -66,170 +121,9 @@ func SubmitCharacter(c echo.Context) error {
 		Items: hero.Items,
 	})
 
-	var character Character
-	db.First(&character, "name = ?", "Mikhail")
-	log.Println(character)
+	finalOpt := getCharacterOptions(db, hero.Name)
 
-	var raceRecords Race
-	_ = db.First(&raceRecords, "name = ?", character.Race)
-
-	items := strings.Split(character.Items, ",")
-	var itemRecords []Item
-	_ = db.Find(&itemRecords, "name in ?", items)
-
-	feats := strings.Split(character.Feats, ",")
-	fmt.Printf("feat actions %v", feats)
-	var featRecords []Feat
-	_ = db.Find(&featRecords, "name in ?", feats)
-
-	log.Println(raceRecords.Options)
-	log.Println(itemRecords)
-	log.Println(featRecords)
-
-	var options []string
-	raceOptions := strings.Split(raceRecords.Options, "|")
-	options = append(options, raceOptions...)
-
-	for _, feat := range featRecords {
-		featOptions := strings.Split(feat.Options, "|")
-		options = append(options, featOptions...)
-	}
-
-	for _, item := range itemRecords {
-		itemOptions := strings.Split(item.Options, "|")
-		options = append(options, itemOptions...)
-	}
-
-	log.Println(options)
-
-	var optionRecords []Option
-	_ = db.Find(&optionRecords, "name in ?", options)
-
-	log.Println(optionRecords)
-	var actions []string
-	var bonusActions []string
-	var passives []string
-
-	for _, opt := range optionRecords {
-		switch {
-		case opt.Type == "Action":
-			actions = append(actions, opt.Name)
-		case opt.Type == "BonusAction":
-			bonusActions = append(bonusActions, opt.Name)
-		case opt.Type == "Passive":
-			passives = append(passives, opt.Name)
-		}
-	}
-
-	log.Println(actions)
-	log.Println(bonusActions)
-	log.Println(passives)
-
-	finalOpt := Options{Actions: actions, BonusActions: bonusActions, Passives: passives}
-	log.Println(finalOpt)
 	return c.Render(http.StatusOK, "character", finalOpt)
-}
-
-type Options struct {
-	Actions      []string `json:"actions"`
-	BonusActions []string `json:"bonus_actions"`
-	Passives     []string `json:"passives"`
-}
-
-func GetOptions(c echo.Context) error {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
-
-	var character Character
-	log.Println(c.Param("name"))
-	db.First(&character, "name = ?", c.Param("name"))
-
-	var raceOptions Race
-	_ = db.First(&raceOptions, "name = ?", character.Race)
-
-	var items []string
-	// convertJSONString(character.Items, items)
-	err = json.Unmarshal([]byte(character.Items), &items)
-	if err != nil {
-		panic(err)
-	}
-	var itemOptions Item
-	_ = db.First(&itemOptions, "name = ?", items[0])
-
-	var feats []string
-	err = json.Unmarshal([]byte(character.Feats), &feats)
-	if err != nil {
-		panic(err)
-	}
-	var featOptions Feat
-	_ = db.First(&featOptions, "name = ?", feats[0])
-
-	var featsOptions []Feat
-	_ = db.Find(&featsOptions)
-	log.Println(featsOptions)
-
-	log.Println(raceOptions.Options)
-	log.Println(itemOptions.Options)
-	log.Println(featOptions.Options)
-
-	var raceOpt []string
-	err = json.Unmarshal([]byte(raceOptions.Options), &raceOpt)
-	if err != nil {
-		panic(err)
-	}
-	log.Println(raceOpt[0])
-
-	// var itemOpt []string
-	// err = json.Unmarshal([]byte(itemOptions.Options), &itemOpt)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// log.Println(itemOpt)
-
-	var featOpt []string
-	err = json.Unmarshal([]byte(featOptions.Options), &featOpt)
-	if err != nil {
-		panic(err)
-	}
-	log.Println(featOpt[0])
-
-	var options []string
-	options = append(options, raceOpt...)
-	// options = append(options, itemOpt...)
-	options = append(options, featOpt...)
-
-	log.Println(options)
-
-	var optionRecords []Option
-	_ = db.Find(&optionRecords, "name in ?", options)
-
-	log.Println(optionRecords)
-	var actions []string
-	var bonusActions []string
-	var passives []string
-
-	for _, opt := range optionRecords {
-		switch {
-		case opt.Type == "Action":
-			actions = append(actions, opt.Name)
-		case opt.Type == "BonusAction":
-			bonusActions = append(bonusActions, opt.Name)
-		case opt.Type == "Passive":
-			passives = append(passives, opt.Name)
-		}
-	}
-
-	log.Println(actions)
-	log.Println(bonusActions)
-	log.Println(passives)
-
-	// return c.HTML(http.StatusOK, response)
-	finalOpt := Options{Actions: actions, BonusActions: bonusActions, Passives: passives}
-	log.Println(finalOpt)
-	return c.Render(http.StatusOK, "character", finalOpt)
-
 }
 
 type Template struct {
@@ -271,7 +165,6 @@ func Start() {
 	//// character
 	server.POST("/character", SubmitCharacter)
 	server.GET("/character/:name", GetCharacter)
-	server.GET("/character/:name/options", GetOptions)
 
 	// Start server
 	server.Logger.Fatal(server.Start(":1323"))
