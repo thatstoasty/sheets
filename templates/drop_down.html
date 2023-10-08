@@ -1,0 +1,5 @@
+<div>
+    <select name="name" hx-get="/character" hx-target="#character" hx-indicator=".htmx-indicator">
+        {{range .}} <option value={{.}}>{{.}}</option> {{end}}
+    </select>
+</div>
