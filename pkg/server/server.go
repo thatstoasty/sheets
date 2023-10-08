@@ -16,17 +16,26 @@ import (
 	"gorm.io/gorm"
 )
 
-type Options struct {
-	Actions      []string `json:"actions"`
-	BonusActions []string `json:"bonus_actions"`
-	Passives     []string `json:"passives"`
+type ClassInfo struct {
+	Class    string
+	Level    string
+	SubClass string
+}
+
+type CharacterInfo struct {
+	Name         string
+	Race         string
+	ClassInfo    []ClassInfo
+	Actions      []string
+	BonusActions []string
+	Passives     []string
 }
 
 func GetIndex(c echo.Context) error {
 	return c.Render(http.StatusOK, "index", nil)
 }
 
-func getCharacterOptions(db *gorm.DB, name string) Options {
+func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 	var character Character
 	db.First(&character, "name = ?", name)
 
@@ -73,9 +82,23 @@ func getCharacterOptions(db *gorm.DB, name string) Options {
 		}
 	}
 
-	finalOpt := Options{Actions: actions, BonusActions: bonusActions, Passives: passives}
+	classes := strings.Split(character.Class, ";")
+	var classInfo []ClassInfo
+	for _, class := range classes {
+		classConfig := strings.Split(class, ",")
+		classInfo = append(classInfo, ClassInfo{Class: classConfig[0], Level: classConfig[1], SubClass: classConfig[2]})
+	}
 
-	return finalOpt
+	characterInfo := CharacterInfo{
+		Name:         character.Name,
+		Race:         character.Race,
+		ClassInfo:    classInfo,
+		Actions:      actions,
+		BonusActions: bonusActions,
+		Passives:     passives,
+	}
+
+	return characterInfo
 }
 
 func GetCharacter(c echo.Context) error {
@@ -83,10 +106,21 @@ func GetCharacter(c echo.Context) error {
 	if err != nil {
 		log.Fatal("failed to connect database")
 	}
+	characterInfo := getCharacterOptions(db, c.QueryParam("name"))
 
-	finalOpt := getCharacterOptions(db, c.Param("name"))
+	return c.Render(http.StatusOK, "character", characterInfo)
+}
 
-	return c.Render(http.StatusOK, "character", finalOpt)
+func GetCharacterNames(c echo.Context) error {
+	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+	if err != nil {
+		log.Fatal("failed to connect database")
+	}
+
+	var names []string
+	db.Table("characters").Select("name").Scan(&names)
+
+	return c.Render(http.StatusOK, "drop_down.html", names)
 }
 
 func SubmitCharacter(c echo.Context) error {
@@ -121,9 +155,9 @@ func SubmitCharacter(c echo.Context) error {
 		Items: hero.Items,
 	})
 
-	finalOpt := getCharacterOptions(db, hero.Name)
+	characterInfo := getCharacterOptions(db, hero.Name)
 
-	return c.Render(http.StatusOK, "character", finalOpt)
+	return c.Render(http.StatusOK, "character", characterInfo)
 }
 
 type Template struct {
@@ -164,7 +198,8 @@ func Start() {
 
 	//// character
 	server.POST("/character", SubmitCharacter)
-	server.GET("/character/:name", GetCharacter)
+	server.GET("/character", GetCharacter)
+	server.GET("/character/names", GetCharacterNames)
 
 	// Start server
 	server.Logger.Fatal(server.Start(":1323"))

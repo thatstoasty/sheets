@@ -46,11 +46,6 @@ type Item struct {
 	Options string
 }
 
-type ClassLevel struct {
-	Class string
-	Level uint32
-}
-
 type Character struct {
 	Name  string `gorm:"primaryKey"`
 	Class string

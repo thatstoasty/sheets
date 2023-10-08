@@ -15,17 +15,38 @@
     <main>
       <div>
         <h1>D&D Character Sheet</h1>
-        <br />
-        <h2>Your Character</h2>
         <div>
           <form
             hx-encoding="multipart/form-data"
             hx-post="/character"
+            hx-target="#character"
             hx-swap="outerHTML"
           >
             <input type="file" name="file" />
             <button>Upload Your Character</button>
           </form>
+
+          OR
+          <br />
+          <form
+            hx-get="/character"
+            hx-include="[name='name']"
+            hx-target="#character"
+            hx-swap="outerHTML"
+          >
+            Enter name: <input name="name" type="name"/>
+            <button>Get Your Character Details</button>
+            </form>
+
+            <div id="contact-input-container">
+                <button
+                    hx-get="/character/names"
+                    hx-trigger="click"
+                    hx-swap="outerHTML"
+                    class="btn btn-primary">Get Characters
+                </button>
+            </div>
+            <div id="character", name="character"></div>
         </div>
       </div>
     </main>

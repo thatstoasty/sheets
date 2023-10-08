@@ -1,4 +1,13 @@
 {{define "character"}}
+<h3>{{.Name}}</h3>
+<h4>{{.Race}}</h4>
+<table>
+    <tbody id="table-character">
+        <th>Character Information</th>
+        {{range .ClassInfo}} {{ template "class_info.html". }} {{end}}
+    </tbody>
+</table>
+
 <div class="row">
     <div class="column">
         <table>
