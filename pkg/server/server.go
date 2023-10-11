@@ -47,8 +47,8 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 	var character Character
 	db.First(&character, "name = ?", name)
 
-	var raceRecords Race
-	_ = db.First(&raceRecords, "name = ?", character.Race)
+	var raceRecords []Race
+	_ = db.Find(&raceRecords, "name in ?", []string{character.Race, "Default"})
 
 	items := strings.Split(character.Items, ",")
 	var itemRecords []Item
@@ -59,8 +59,11 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 	_ = db.Find(&featRecords, "name in ?", feats)
 
 	var options []string
-	raceOptions := strings.Split(raceRecords.Options, "|")
-	options = append(options, raceOptions...)
+
+	for _, race := range raceRecords {
+		raceOptions := strings.Split(race.Options, "|")
+		options = append(options, raceOptions...)
+	}
 
 	for _, feat := range featRecords {
 		featOptions := strings.Split(feat.Options, "|")
@@ -136,7 +139,22 @@ func GetCharacterNames(c echo.Context) error {
 	var names []string
 	db.Table("characters").Select("name").Scan(&names)
 
-	return c.Render(http.StatusOK, "drop_down.html", names)
+	return c.Render(http.StatusOK, "drop_down", names)
+}
+
+func GetOptionDescription(c echo.Context) error {
+	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+	if err != nil {
+		log.Fatal("failed to connect database")
+	}
+
+	name := c.Request().Header["Hx-Trigger-Name"][0]
+	log.Println(name)
+
+	var option Option
+	db.Table("options").Select("description").Where("name = ?", name).First(&option)
+
+	return c.Render(http.StatusOK, "description", option.Description)
 }
 
 func SubmitCharacter(c echo.Context) error {
@@ -225,6 +243,7 @@ func Start() {
 	server.POST("/character", SubmitCharacter)
 	server.GET("/character", GetCharacter)
 	server.GET("/character/names", GetCharacterNames)
+	server.GET("/option", GetOptionDescription)
 
 	// Start server
 	server.Logger.Fatal(server.Start(":1323"))

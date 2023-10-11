@@ -71,7 +71,7 @@ func SetupDB() {
 	// Create Options
 	options := readCSVData("data/option.csv")
 	for _, option := range options {
-		db.Save(&Option{Name: option[0], Type: option[1]})
+		db.Save(&Option{Name: option[0], Type: option[1], Description: option[2]})
 	}
 
 	db.Save(&Character{

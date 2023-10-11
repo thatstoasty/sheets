@@ -1,3 +1,4 @@
+{{define "drop_down"}}
 <div>
     <select name="name"
     hx-get="/character"
@@ -7,3 +8,4 @@
         {{range .}} <option value={{.}}>{{.}}</option> {{end}}
     </select>
 </div>
+{{end}}

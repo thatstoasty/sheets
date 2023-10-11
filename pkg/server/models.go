@@ -1,23 +1,9 @@
 package server
 
-type Metadata struct {
-}
-
 type Option struct {
-	Name string `gorm:"primaryKey"`
-	Type string
-}
-
-type Action struct {
-	Name string `gorm:"primaryKey"`
-}
-
-type BonusAction struct {
-	Name string `gorm:"primaryKey"`
-}
-
-type Passive struct {
-	Name string `gorm:"primaryKey"`
+	Name        string `gorm:"primaryKey"`
+	Type        string
+	Description string
 }
 
 type Class struct {

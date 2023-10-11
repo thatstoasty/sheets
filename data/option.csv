@@ -1,3 +1,17 @@
-Cast War,Action
-Polearm Master Extra Attack,BonusAction
-Darkvision,Passive
+Cast War,Action,It's an action
+Polearm Master Extra Attack,BonusAction,It's a bonus action
+Darkvision,Passive,It's an passive
+Attack,Action,It's an action
+Ranged Attack,Action,It's an action
+Unarmed Attack,Action,It's an action
+Grapple,Action,It's an action
+Shove,Action,It's an action
+Dash,Action,It's an action
+Disengage,Action,It's an action
+Dodge,Action,It's an action
+Use Object,Action,It's an action
+Equip Item,Action,It's an action
+Escape Grapple,Action,It's an action
+Hide,Action,It's an action
+Search,Action,It's an action
+Ready Action,Action,It's an action

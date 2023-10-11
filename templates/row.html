@@ -1,3 +1,12 @@
 <tr id="datarow-1">
-  <td>{{.}}</td>
+  <td>
+    <button name={{.}}
+    hx-get="/option"
+    hx-trigger="click"
+    hx-target="#description"
+    hx-swap="innerHTML"
+    >
+        {{.}}
+    </button>
+  </td>
 </tr>
