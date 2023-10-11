@@ -73,4 +73,20 @@ func SetupDB() {
 	for _, option := range options {
 		db.Save(&Option{Name: option[0], Type: option[1]})
 	}
+
+	db.Save(&Character{
+		Name:         "Example",
+		Class:        "Fighter,1,",
+		HP:           "1",
+		Proficiency:  "1",
+		Strength:     "1",
+		Dexterity:    "1",
+		Constitution: "1",
+		Intelligence: "1",
+		Wisdom:       "1",
+		Charisma:     "1",
+		Race:         "Dwarf",
+		Feats:        "",
+		Items:        "",
+	})
 }

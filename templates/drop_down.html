@@ -1,5 +1,9 @@
 <div>
-    <select name="name" hx-get="/character" hx-target="#character" hx-indicator=".htmx-indicator">
+    <select name="name"
+    hx-get="/character"
+    hx-target="#character"
+    hx-swap="innerHTML"
+    >
         {{range .}} <option value={{.}}>{{.}}</option> {{end}}
     </select>
 </div>

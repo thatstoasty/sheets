@@ -6,8 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
-    <link href=' http://fonts.googleapis.com/css?family=Pixelify+Sans' rel='stylesheet' type='text/css'>
-    <link href=”https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css” rel=”stylesheet”>
+    <link
+      href=" http://fonts.googleapis.com/css?family=Pixelify+Sans"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link href=”https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css”
+    rel=”stylesheet”>
     <link href="/css/output.css" rel="stylesheet" />
     <title>D&D Character Sheet</title>
   </head>
@@ -20,33 +25,25 @@
             hx-encoding="multipart/form-data"
             hx-post="/character"
             hx-target="#character"
-            hx-swap="outerHTML"
+            hx-swap="innerHTML"
           >
             <input type="file" name="file" />
             <button>Upload Your Character</button>
           </form>
-
           OR
           <br />
-          <form
-            hx-get="/character"
-            hx-include="[name='name']"
-            hx-target="#character"
-            hx-swap="outerHTML"
-          >
-            Enter name: <input name="name" type="name"/>
-            <button>Get Your Character Details</button>
-            </form>
-
-            <div id="contact-input-container">
-                <button
-                    hx-get="/character/names"
-                    hx-trigger="click"
-                    hx-swap="outerHTML"
-                    class="btn btn-primary">Get Characters
-                </button>
-            </div>
-            <div id="character", name="character"></div>
+          <div id="contact-input-container">
+            <button
+              hx-get="/character/names"
+              hx-trigger="click"
+              hx-swap="outerHTML"
+              class="btn btn-primary"
+            >
+              Get Characters
+            </button>
+          </div>
+          <br />
+          <div id="character" , name="character"></div>
         </div>
       </div>
     </main>

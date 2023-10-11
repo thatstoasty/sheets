@@ -25,6 +25,14 @@ type ClassInfo struct {
 type CharacterInfo struct {
 	Name         string
 	Race         string
+	HP           string
+	Proficiency  string
+	Strength     string
+	Dexterity    string
+	Constitution string
+	Intelligence string
+	Wisdom       string
+	Charisma     string
 	ClassInfo    []ClassInfo
 	Actions      []string
 	BonusActions []string
@@ -92,6 +100,14 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 	characterInfo := CharacterInfo{
 		Name:         character.Name,
 		Race:         character.Race,
+		HP:           character.HP,
+		Proficiency:  character.Proficiency,
+		Strength:     character.Strength,
+		Dexterity:    character.Dexterity,
+		Constitution: character.Constitution,
+		Intelligence: character.Intelligence,
+		Wisdom:       character.Wisdom,
+		Charisma:     character.Charisma,
 		ClassInfo:    classInfo,
 		Actions:      actions,
 		BonusActions: bonusActions,
@@ -148,14 +164,23 @@ func SubmitCharacter(c echo.Context) error {
 	}
 
 	db.Save(&Character{
-		Name:  hero.Name,
-		Class: hero.Class,
-		Race:  hero.Race,
-		Feats: hero.Feats,
-		Items: hero.Items,
+		Name:         hero.Name,
+		Class:        hero.Class,
+		HP:           hero.HP,
+		Proficiency:  hero.Proficiency,
+		Strength:     hero.Strength,
+		Dexterity:    hero.Dexterity,
+		Constitution: hero.Constitution,
+		Intelligence: hero.Intelligence,
+		Wisdom:       hero.Wisdom,
+		Charisma:     hero.Charisma,
+		Race:         hero.Race,
+		Feats:        hero.Feats,
+		Items:        hero.Items,
 	})
 
 	characterInfo := getCharacterOptions(db, hero.Name)
+	log.Println(characterInfo)
 
 	return c.Render(http.StatusOK, "character", characterInfo)
 }

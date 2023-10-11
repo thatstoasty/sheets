@@ -47,11 +47,19 @@ type Item struct {
 }
 
 type Character struct {
-	Name  string `gorm:"primaryKey"`
-	Class string
-	Race  string
-	Feats string
-	Items string
+	Name         string `gorm:"primaryKey"`
+	Class        string
+	HP           string
+	Proficiency  string
+	Strength     string
+	Dexterity    string
+	Constitution string
+	Intelligence string
+	Wisdom       string
+	Charisma     string
+	Race         string
+	Feats        string
+	Items        string
 }
 
 type Config struct {
