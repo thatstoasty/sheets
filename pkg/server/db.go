@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	// "github.com/BurntSushi/toml"
 	"gorm.io/driver/sqlite"
@@ -72,6 +73,16 @@ func SetupDB() {
 	options := readCSVData("data/option.csv")
 	for _, option := range options {
 		db.Save(&Option{Name: option[0], Type: option[1], Description: option[2]})
+	}
+
+	// Create Class Features
+	classFeatures := readCSVData("data/class_features.csv")
+	for _, classFeature := range classFeatures {
+		level, err := strconv.ParseInt(classFeature[3], 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		db.Save(&ClassFeature{Name: classFeature[0], Class: classFeature[1], SubClass: classFeature[2], Level: uint32(level), Options: classFeature[4]})
 	}
 
 	db.Save(&Character{

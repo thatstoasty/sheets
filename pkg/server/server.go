@@ -58,6 +58,19 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 	var featRecords []Feat
 	_ = db.Find(&featRecords, "name in ?", feats)
 
+	allClassInfo := strings.Split(character.Class, ",")
+	var classInfo []ClassInfo
+	var allClassFeatureRecords []ClassFeature
+	for _, class := range allClassInfo {
+		classConfig := strings.Split(class, "|")
+		log.Println(classConfig)
+
+		var classFeatureRecords []ClassFeature
+		_ = db.Where("class = ? AND level <= ? AND sub_class in ?", classConfig[0], classConfig[1], []string{"Base", classConfig[2]}).Find(&classFeatureRecords)
+		allClassFeatureRecords = append(allClassFeatureRecords, classFeatureRecords...)
+		classInfo = append(classInfo, ClassInfo{Class: classConfig[0], Level: classConfig[1], SubClass: classConfig[2]})
+	}
+
 	var options []string
 
 	for _, race := range raceRecords {
@@ -73,6 +86,11 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 	for _, item := range itemRecords {
 		itemOptions := strings.Split(item.Options, "|")
 		options = append(options, itemOptions...)
+	}
+
+	for _, classFeature := range allClassFeatureRecords {
+		classFeatureOptions := strings.Split(classFeature.Options, "|")
+		options = append(options, classFeatureOptions...)
 	}
 
 	var optionRecords []Option
@@ -91,13 +109,6 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 		case opt.Type == "Passive":
 			passives = append(passives, opt.Name)
 		}
-	}
-
-	classes := strings.Split(character.Class, ";")
-	var classInfo []ClassInfo
-	for _, class := range classes {
-		classConfig := strings.Split(class, ",")
-		classInfo = append(classInfo, ClassInfo{Class: classConfig[0], Level: classConfig[1], SubClass: classConfig[2]})
 	}
 
 	characterInfo := CharacterInfo{
@@ -149,7 +160,6 @@ func GetOptionDescription(c echo.Context) error {
 	}
 
 	name := c.Request().Header["Hx-Trigger-Name"][0]
-	log.Println(name)
 
 	var option Option
 	db.Table("options").Select("description").Where("name = ?", name).First(&option)
@@ -198,7 +208,6 @@ func SubmitCharacter(c echo.Context) error {
 	})
 
 	characterInfo := getCharacterOptions(db, hero.Name)
-	log.Println(characterInfo)
 
 	return c.Render(http.StatusOK, "character", characterInfo)
 }

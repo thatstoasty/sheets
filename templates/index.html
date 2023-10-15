@@ -6,13 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
-    <link
-      href=" http://fonts.googleapis.com/css?family=Pixelify+Sans"
-      rel="stylesheet"
-      type="text/css"
-    />
-    <link href=”https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css”
-    rel=”stylesheet”>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;400&display=swap" rel="stylesheet">
     <link href="/css/output.css" rel="stylesheet" />
     <title>D&D Character Sheet</title>
   </head>
@@ -43,8 +39,12 @@
             </button>
           </div>
           <br />
-          <div id="character" , name="character"></div>
-          <div id="description" , name="description"></div>
+          <div class="flex-container">
+            <div class="row">
+                <div class="column" id="character" , name="character"></div>
+                <div class="column" id="description" , name="description"></div>
+            </div>
+          </div>
         </div>
       </div>
     </main>

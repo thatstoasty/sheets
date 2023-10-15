@@ -11,10 +11,11 @@ type Class struct {
 }
 
 type ClassFeature struct {
-	Name    string `gorm:"primaryKey"`
-	Class   string
-	Level   uint32
-	Options string
+	Name     string `gorm:"primaryKey"`
+	Class    string `gorm:"primaryKey"`
+	SubClass string `gorm:"primaryKey"`
+	Level    uint32
+	Options  string
 }
 
 type Race struct {
@@ -23,13 +24,22 @@ type Race struct {
 }
 
 type Feat struct {
-	Name    string `gorm:"primaryKey"`
-	Options string
+	Name        string `gorm:"primaryKey"`
+	Description string
+	Options     string
 }
 
 type Item struct {
-	Name    string `gorm:"primaryKey"`
-	Options string
+	Name        string `gorm:"primaryKey"`
+	Description string
+	Options     string
+}
+
+type Spell struct {
+	Name        string `gorm:"primaryKey"`
+	Level       uint32
+	Description string
+	Options     string
 }
 
 type Character struct {
@@ -55,10 +65,3 @@ type Config struct {
 	Feats string
 	Items string
 }
-
-// type Spell struct {
-// 	ID  		uint32 `gorm:"primaryKey,autoIncrement"`
-// 	Name	 	string
-// 	Description string
-// 	Level		uint32
-// }
