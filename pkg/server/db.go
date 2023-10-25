@@ -42,6 +42,9 @@ func SetupDB() {
 	db.AutoMigrate(&Race{})
 	db.AutoMigrate(&Feat{})
 	db.AutoMigrate(&Item{})
+	db.AutoMigrate(&Weapon{})
+	db.AutoMigrate(&Gear{})
+	db.AutoMigrate(&Spell{})
 	db.AutoMigrate(&Option{})
 	db.AutoMigrate(&Character{})
 
@@ -66,13 +69,39 @@ func SetupDB() {
 	// Create Items
 	items := readCSVData("data/item.csv")
 	for _, item := range items {
-		db.Save(&Item{Name: item[0], Options: item[1]})
+		quantity, err := strconv.ParseInt(item[1], 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		db.Save(&Item{Name: item[0], Quantity: uint16(quantity), Description: item[2], Properties: item[3], Options: item[4]})
+	}
+
+	// Create Weapons
+	weapons := readCSVData("data/weapon.csv")
+	for _, weapon := range weapons {
+		db.Save(&Weapon{Name: weapon[0], Type: weapon[1], Description: weapon[2], Properties: weapon[3], Options: weapon[4]})
+	}
+
+	// Create Armor
+	armors := readCSVData("data/armor.csv")
+	for _, armor := range armors {
+		db.Save(&Gear{Name: armor[0], Type: armor[1], Description: armor[2], Properties: armor[3], Options: armor[4]})
 	}
 
 	// Create Options
 	options := readCSVData("data/option.csv")
 	for _, option := range options {
 		db.Save(&Option{Name: option[0], Type: option[1], Description: option[2]})
+	}
+
+	// Create Spells
+	spells := readCSVData("data/spell.csv")
+	for _, spell := range spells {
+		level, err := strconv.ParseInt(spell[1], 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		db.Save(&Spell{Name: spell[0], Level: uint16(level), Description: spell[2], Options: spell[3]})
 	}
 
 	// Create Class Features

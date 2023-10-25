@@ -37,6 +37,8 @@ type CharacterInfo struct {
 	Actions      []string
 	BonusActions []string
 	Passives     []string
+	Items        []string
+	Equipped     []string
 }
 
 func GetIndex(c echo.Context) error {
@@ -49,6 +51,14 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 
 	var raceRecords []Race
 	_ = db.Find(&raceRecords, "name in ?", []string{character.Race, "Default"})
+
+	gear := []string{character.Helmet, character.Armor, character.Boots, character.Cloak, character.Jewelery1, character.Jewelery2, character.Jewelery3}
+	var gearRecords []Gear
+	_ = db.Find(&gearRecords, "name in ?", gear)
+
+	weapons := []string{character.MainHandWeapon, character.OffHandWeapon}
+	var weaponRecords []Weapon
+	_ = db.Find(&weaponRecords, "name in ?", weapons)
 
 	items := strings.Split(character.Items, ",")
 	var itemRecords []Item
@@ -111,6 +121,14 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 		}
 	}
 
+	var equipped []string
+	equipped = append(equipped, weapons...)
+	equipped = append(equipped, gear...)
+
+	log.Println(weapons)
+	log.Println(gear)
+	log.Println(equipped)
+
 	characterInfo := CharacterInfo{
 		Name:         character.Name,
 		Race:         character.Race,
@@ -126,6 +144,8 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 		Actions:      actions,
 		BonusActions: bonusActions,
 		Passives:     passives,
+		Items:        items,
+		Equipped:     equipped,
 	}
 
 	return characterInfo
@@ -192,19 +212,28 @@ func SubmitCharacter(c echo.Context) error {
 	}
 
 	db.Save(&Character{
-		Name:         hero.Name,
-		Class:        hero.Class,
-		HP:           hero.HP,
-		Proficiency:  hero.Proficiency,
-		Strength:     hero.Strength,
-		Dexterity:    hero.Dexterity,
-		Constitution: hero.Constitution,
-		Intelligence: hero.Intelligence,
-		Wisdom:       hero.Wisdom,
-		Charisma:     hero.Charisma,
-		Race:         hero.Race,
-		Feats:        hero.Feats,
-		Items:        hero.Items,
+		Name:           hero.Name,
+		Class:          hero.Class,
+		HP:             hero.HP,
+		Proficiency:    hero.Proficiency,
+		Strength:       hero.Strength,
+		Dexterity:      hero.Dexterity,
+		Constitution:   hero.Constitution,
+		Intelligence:   hero.Intelligence,
+		Wisdom:         hero.Wisdom,
+		Charisma:       hero.Charisma,
+		Race:           hero.Race,
+		Feats:          hero.Feats,
+		Items:          hero.Items,
+		Helmet:         hero.Helmet,
+		Cloak:          hero.Cloak,
+		Jewelery1:      hero.Jewelery1,
+		Jewelery2:      hero.Jewelery2,
+		Jewelery3:      hero.Jewelery3,
+		Boots:          hero.Boots,
+		Gloves:         hero.Gloves,
+		MainHandWeapon: hero.MainHandWeapon,
+		OffHandWeapon:  hero.OffHandWeapon,
 	})
 
 	characterInfo := getCharacterOptions(db, hero.Name)

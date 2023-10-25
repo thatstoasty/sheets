@@ -18,6 +18,23 @@
             {{range .ClassInfo}} {{ template "class_info.html". }} {{end}}
         </div>
     </div>
+
+    <div class="border">
+        <table>
+            <tbody id="table-inventory">
+                <th>Inventory</th>
+                {{range .Items}} {{ template "row.html". }} {{end}}
+            </tbody>
+        </table>
+    </div>
+    <div class="border">
+        <table>
+            <tbody id="table-equipped">
+                <th>Equipped</th>
+                {{range .Equipped}} {{ template "row.html". }} {{end}}
+            </tbody>
+        </table>
+    </div>
     <div id="flex-container">
         <div class="column">
             <table>
