@@ -32,7 +32,6 @@ Empowered Evocation,Wizard,School of Evocation,10,Empowered Evocation
 Illusory Self,Wizard,School of Illusion,10,Illusory Self
 Inured to Undeath,Wizard,School of Necromancy,10,Inured to Undeath
 Shapechanger,Wizard,School of Transmutation,10,Shapechanger
-Divine Intervention,Wizard,Base,10,Divine Intervention
 Spell Resistance,Wizard,School of Abjuration,14,Spell Resistance
 Durable Summons,Wizard,School of Conjuration,14,Durable Summons
 Greater Portent,Wizard,School of Divination,14,Greater Portent
@@ -41,4 +40,5 @@ Overchannel,Wizard,School of Evocation,14,Overchannel
 Illusory Reality,Wizard,School of Illusion,14,Illusory Reality
 Command Undead,Wizard,School of Necromancy,14,Command Undead
 Master Transmuter,Wizard,School of Transmutation,14,Master Transmuter
-Signature Spells,Wizard,Base,10,Signature Spells
+Spell Mastery,Wizard,Base,18,Spell Mastery
+Signature Spells,Wizard,Base,20,Signature Spells
