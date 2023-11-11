@@ -1,7 +1,11 @@
 Blessings of Knowledge,Cleric,Knowledge Domain,1,Blessings of Knowledge
+Life Domain Cleric: Bonus Proficiencies,Cleric,Life Domain,1,Life Domain Cleric: Bonus Proficiencies
 Disciple of Life,Cleric,Life Domain,1,Disciple of Life
+Light Domain Cleric: Bonus Cantrip,Cleric,Light Domain,1,Light Domain Cleric: Bonus Cantrip
 Warding Flare,Cleric,Light Domain,1,Warding Flare
+Nature Domain Cleric: Bonus Proficiencies,Cleric,Nature Domain,1,Nature Domain Cleric: Bonus Proficiencies
 Acolyte of Nature,Cleric,Nature Domain,1,Acolyte of Nature
+Tempest Domain Cleric: Bonus Proficiencies,Cleric,Tempest Domain,1,Tempest Domain Cleric: Bonus Proficiencies
 Wrath of the Storm,Cleric,Tempest Domain,1,Wrath of the Storm
 Blessing of the Trickster,Cleric,Trickery Domain,1,Blessing of the Trickster
 War Priest,Cleric,War Domain,1,War Priest
@@ -17,7 +21,6 @@ Harness Divine Power,Cleric,Base,2,Harness Divine Power
 Destroy Undead,Cleric,Base,5,Destroy Undead
 Channel Divinity: Read Thoughts,Cleric,Knowledge Domain,6,Channel Divinity: Read Thoughts
 Blessed Healer,Cleric,Life Domain,6,Blessed Healer
-Improved Flare,Cleric,Light Domain,6,Improved Flare
 Dampen Elements,Cleric,Nature Domain,6,Dampen Elements
 Thunderous Strike,Cleric,Tempest Domain,6,Thunderous Strike
 Channel Divinity: Cloak of Shadows,Cleric,Trickery Domain,6,Channel Divinity: Cloak of Shadows
