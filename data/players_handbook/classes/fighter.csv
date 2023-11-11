@@ -1,5 +1,6 @@
 Second Wind,Fighter,Base,1,Second Wind
 Action Surge,Fighter,Base,1,Action Surge
+Fighting Style,Fighter,Base,1,Fighting Style
 Improved Critical,Fighter,Champion,3,Improved Critical
 Combat Superiority,Fighter,Battle Master,3,Combat Superiority
 Student of War,Fighter,Battle Master,3,Student of War
@@ -15,4 +16,3 @@ Superior Critical,Fighter,Champion,15,Superior Critical
 Relentless,Fighter,Battle Master,15,Relentless
 Arcane Charge,Fighter,Eldritch Knight,15,Arcane Charge
 Survivor,Fighter,Champion,18,Survivor
-Improved War Magic,Fighter,Eldritch Knight,18,Improved War Magic

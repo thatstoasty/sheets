@@ -1,15 +1,16 @@
 Wild Shape,Druid,Base,2,Wild Shape
 Wild Companion,Druid,Base,2,Wild Companion
+Circle of the Land Druid: Bonus Cantrip,Druid,Circle of the Land,2,Circle of the Land Druid: Bonus Cantrip
 Natural Recovery,Druid,Circle of the Land,2,Natural Recovery
 Combat Wild Shape,Druid,Circle of the Moon,2,Combat Wild Shape
+Circle Spells,Druid,Circle of the Land,3,Circle Spells
+Circle Forms,Druid,Circle of the Land,3,Circle Forms
 Land's Stride,Druid,Circle of the Land,6,Land's Stride
 Primal Strike,Druid,Circle of the Moon,6,Primal Strike
-Feral Instinct,Druid,Base,7,Feral Instinct
-Brutal Critical,Druid,Base,7,Brutal Critical
 Nature's Ward,Druid,Circle of the Land,10,Nature's Ward
 Elemental Wild Shape,Druid,Circle of the Moon,10,Elemental Wild Shape
 Nature's Sanctuary,Druid,Circle of the Land,14,Nature's Sanctuary
 Thousand Forms,Druid,Circle of the Moon,14,Thousand Forms
-Timeless Body,Druid,Base,18,Timeless Body
+Druid: Timeless Body,Druid,Base,18,Druid: Timeless Body
 Beast Spells,Druid,Base,18,Beast Spells
 Archdruid,Druid,Base,20,Archdruid

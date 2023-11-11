@@ -1,6 +1,9 @@
 Unarmored Defense,Monk,Base,1,Unarmored Defense
 Martial Arts,Monk,Base,1,Martial Arts
 Ki,Monk,Base,2,Ki
+Flurry of Blows,Monk,Base,2,Flurry of Blows
+Patient Defense,Monk,Base,2,Patient Defense
+Step of the Wind,Monk,Base,2,Step of the Wind
 Unarmored Movement,Monk,Base,2,Unarmored Movement
 Dedicated Weapon,Monk,Base,2,Dedicated Weapon
 Deflect Missiles,Monk,Base,3,Deflect Missiles
@@ -12,6 +15,7 @@ Slow Fall,Monk,Base,4,Slow Fall
 Quickened Healing,Monk,Base,4,Quickened Healing
 Extra Attack,Monk,Base,5,Extra Attack
 Stunning Strike,Monk,Base,5,Stunning Strike
+Focused Aim,Monk,Base,5,Focused Aim
 Ki-Empowered Strikes,Monk,Base,6,Ki-Empowered Strikes
 Wholeness of Body,Monk,Way of the Open Hand,6,Wholeness of Body
 Shadow Step,Monk,Way of the Shadow,6,Shadow Step
@@ -22,8 +26,8 @@ Tranquility,Monk,Way of the Open Hand,11,Tranquility
 Cloak of Shadows,Monk,Way of the Shadow,11,Cloak of Shadows
 Tongue of the Sun and Moon,Monk,Base,13,Tongue of the Sun and Moon
 Diamond Soul,Monk,Base,14,Diamond Soul
-Timeless Body,Monk,Base,15,Timeless Body
-Quivering Palm,Monk,Way of the Open Hand,17,Quivering Palm
+Timeless Body,Monk,Base,15,Monk: Timeless Body
+Monk: Quivering Palm,Monk,Way of the Open Hand,17,Quivering Palm
 Opportunist,Monk,Way of the Shadow,17,Opportunist
 Empty Body,Monk,Base,18,Empty Body
 Perfect Self,Monk,Base,18,Perfect Self
