@@ -1,0 +1,25 @@
+Light Crossbow,Ranged,1d8 Piercing,Ammunition (range 80/320)|Loading|Two-Handed,Ranged Attack
+Light Crossbow +1,Ranged,1d8+1 Piercing,Ammunition (range 80/320)|Loading|Two-Handed,Ranged Attack
+Light Crossbow +2,Ranged,1d8+2 Piercing,Ammunition (range 80/320)|Loading|Two-Handed,Ranged Attack
+Dart,Ranged,1d4 Piercing,Finesse|Thrown (range 20/60),Ranged Attack
+Dart +1,Ranged,1d4+1 Piercing,Finesse|Thrown (range 20/60),Ranged Attack
+Dart +2,Ranged,1d4 Piercing,Finesse|Thrown (range 20/60),Ranged Attack
+Shortbow,Ranged,1d6 Piercing Damage,Ammunition|Range|Two-Handed,Ranged Attack
+Shortbow +1,Ranged,1d6+1 Piercing Damage,Ammunition|Range|Two-Handed,Ranged Attack
+Shortbow +2,Ranged,1d6+2 Piercing Damage,Ammunition|Range|Two-Handed,Ranged Attack
+Sling,Ranged,1d4 Bludgeoning,Ammunition (range 30/120),Ranged Attack
+Sling +1,Ranged,1d4+1 Bludgeoning,Ammunition (range 30/120),Ranged Attack
+Sling +2,Ranged,1d4 Bludgeoning,Ammunition (range 30/120),Ranged Attack
+Blowgun,Ranged,1 Piercing,Ammunition (range 25/100)|Loading,Ranged Attack
+Blowgun +1,Ranged,1 Piercing,Ammunition (range 25/100)|Loading,Ranged Attack
+Blowgun +2,Ranged,1 Piercing,Ammunition (range 25/100)|Loading,Ranged Attack
+Hand Crossbow,Ranged,1d6 Piercing,Ammunition (range 30/120)|Light|Loading,Ranged Attack
+Hand Crossbow +1,Ranged,1d6+1 Piercing,Ammunition (range 30/120)|Light|Loading,Ranged Attack
+Hand Crossbow +2,Ranged,1d6+2 Piercing,Ammunition (range 30/120)|Light|Loading,Ranged Attack
+Heavy Crossbow,Ranged,1d10 Piercing,Ammunition (range 100/400)|heavy|Loading|Two-Handed,Ranged Attack
+Heavy Crossbow +1,Ranged,1d10+1 Piercing,Ammunition (range 100/400)|heavy|Loading|Two-Handed,Ranged Attack
+Heavy Crossbow +2,Ranged,1d10+2 Piercing,Ammunition (range 100/400)|heavy|Loading|Two-Handed,Ranged Attack
+Longbow,Ranged,1d8 Piercing,Ammunition (range 150/600)|heavy|Two-Handed,Ranged Attack
+Longbow +1,Ranged,1d8+1 Piercing,Ammunition (range 150/600)|heavy|Two-Handed,Ranged Attack
+Longbow +2,Ranged,1d8+2 Piercing,Ammunition (range 150/600)|heavy|Two-Handed,Ranged Attack
+Net,Ranged,0,Special|Thrown (range 5/15),Ranged Attack

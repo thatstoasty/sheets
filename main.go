@@ -3,14 +3,17 @@ package main
 import (
 	"encoding/json"
 	// "fmt"
-	// "log"
+	"log"
 	// "strings"
 
 	// "gorm.io/driver/sqlite"
 	// "gorm.io/gorm"
 
 	// "github.com/BurntSushi/toml"
+	"fmt"
 	"github.com/thatstoasty/character-sheet-ui/pkg/server"
+	"os"
+	"path/filepath"
 )
 
 func convertJSONString(jsonString string, targetObj any) {
@@ -18,6 +21,16 @@ func convertJSONString(jsonString string, targetObj any) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func iterate(path string) {
+	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
+		fmt.Printf("File Name: %s\n", info.Name())
+		return nil
+	})
 }
 
 func main() {
@@ -229,4 +242,10 @@ func main() {
 
 	server.SetupDB()
 	server.Start()
+
+	// currentDirectory, err := os.Getwd()
+	// if err != nil {
+	//     log.Fatal(err)
+	// }
+	// iterate(currentDirectory)
 }

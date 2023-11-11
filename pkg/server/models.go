@@ -6,10 +6,6 @@ type Option struct {
 	Description string
 }
 
-type Class struct {
-	Name string `gorm:"primaryKey"`
-}
-
 type ClassFeature struct {
 	Name     string `gorm:"primaryKey"`
 	Class    string `gorm:"primaryKey"`

@@ -1,0 +1,87 @@
+Rapier,Melee,1d8 Piercing,Finesse,Attack
+Rapier +1,Melee,1d8+1 Piercing,Finesse,Attack
+Rapier +2,Melee,1d8+2 Piercing,Finesse,Attack
+Club,Melee,1d4 Bludgeoning,Light,Attack
+Club +1,Melee,1d4+1 Bludgeoning,Light,Attack
+Club +2,Melee,1d4 Bludgeoning,Light,Attack
+Dagger,Melee,1d4 Piercing,Finesse|Light|Thrown (range 20/60),Attack
+Dagger +1,Melee,1d4+1 Piercing,Finesse|Light|Thrown (range 20/60),Attack
+Dagger +2,Melee,1d4 Piercing,Finesse|Light|Thrown (range 20/60),Attack
+Greatclub,Melee,1d8 Bludgeoning,Two-handed,Attack
+Greatclub +1,Melee,1d8+1 Bludgeoning,Two-handed,Attack
+Greatclub +2,Melee,1d8+2 Bludgeoning,Two-handed,Attack
+Handaxe,Melee,1d6 Slashing,Light|Thrown (range 20/60),Attack
+Handaxe +1,Melee,1d6+1 Slashing,Light|Thrown (range 20/60),Attack
+Handaxe +2,Melee,1d6+2 Slashing,Light|Thrown (range 20/60),Attack
+Javelin,Melee,1d6 Piercing,Thrown (range 30/120),Attack
+Javelin +1,Melee,1d6+1 Piercing,Thrown (range 30/120),Attack
+Javelin +2,Melee,1d6+2 Piercing,Thrown (range 30/120),Attack
+Light Hammer,Melee,1d4 Bludgeoning,Light|Thrown (range 20/60),Attack
+Light Hammer +1,Melee,1d4+1 Bludgeoning,Light|Thrown (range 20/60),Attack
+Light Hammer +2,Melee,1d4 Bludgeoning,Light|Thrown (range 20/60),Attack
+Mace,Melee,1d6 Bludgeoning,,Attack
+Mace +1,Melee,1d6+1 Bludgeoning,,Attack
+Mace +2,Melee,1d6+2 Bludgeoning,,Attack
+Quarterstaff,Melee,1d6 Bludgeoning,Versatile (1d8),Attack
+Quarterstaff +1,Melee,1d6+1 Bludgeoning,Versatile (1d8),Attack
+Quarterstaff +2,Melee,1d6+2 Bludgeoning,Versatile (1d8),Attack
+Sickle,Melee,1d4 Slashing,Light,Attack
+Sickle +1,Melee,1d4+1 Slashing,Light,Attack
+Sickle +2,Melee,1d4 Slashing,Light,Attack
+Spear,Melee,1d6 Piercing,Thrown (range 20/60)|Versatile (1d8),Attack
+Spear +1,Melee,1d6+1 Piercing,Thrown (range 20/60)|Versatile (1d8),Attack
+Spear +2,Melee,1d6+2 Piercing,Thrown (range 20/60)|Versatile (1d8),Attack
+Battleaxe,Melee,1d8 Slashing,Versatile (1d10),Attack
+Battleaxe +1,Melee,1d8+1 Slashing,Versatile (1d10),Attack
+Battleaxe +2,Melee,1d8+2 Slashing,Versatile (1d10),Attack
+Flail,Melee,1d8 Bludgeoning,,Attack
+Flail +1,Melee,1d8+1 Bludgeoning,,Attack
+Flail +2,Melee,1d8+2 Bludgeoning,,Attack
+Glaive,Melee,1d10 Slashing,Heavy|Reach|Two-Handed,Attack
+Glaive +1,Melee,1d10+1 Slashing,Heavy|Reach|Two-Handed,Attack
+Glaive +2,Melee,1d10+2 Slashing,Heavy|Reach|Two-Handed,Attack
+Greataxe,Melee,1d12 Slashing,Heavy|Two-Handed,Attack
+Greataxe +1,Melee,1d12 Slashing,Heavy|Two-Handed,Attack
+Greataxe +2,Melee,1d12 Slashing,Heavy|Two-Handed,Attack
+Greatsword,Melee,2d6 Slashing,Heavy|Two-Handed,Attack
+Greatsword +1,Melee,2d6 Slashing,Heavy|Two-Handed,Attack
+Greatsword +2,Melee,2d6 Slashing,Heavy|Two-Handed,Attack
+Halberd,Melee,Slashing,Heavy|Reach|Two-Handed,Attack
+Halberd +1,Melee,Slashing,Heavy|Reach|Two-Handed,Attack
+Halberd +2,Melee,Slashing,Heavy|Reach|Two-Handed,Attack
+Lance,Melee,1d12 Piercing,Reach|Special,Attack
+Lance +1,Melee,1d12 Piercing,Reach|Special,Attack
+Lance +2,Melee,1d12 Piercing,Reach|Special,Attack
+Longsword,Melee,1d8 Slashing,Versatile (1d10),Attack
+Longsword +1,Melee,1d8+1 Slashing,Versatile (1d10),Attack
+Longsword +2,Melee,1d8+2 Slashing,Versatile (1d10),Attack
+Maul,Melee,2d6 Bludgeoning,Heavy|Two-Handed,Attack
+Maul +1,Melee,2d6 Bludgeoning,Heavy|Two-Handed,Attack
+Maul +2,Melee,2d6 Bludgeoning,Heavy|Two-Handed,Attack
+Morningstar,Melee,1d8 Piercing,,Attack
+Morningstar +1,Melee,1d8+1 Piercing,,Attack
+Morningstar +2,Melee,1d8+2 Piercing,,Attack
+Pike,Melee,1d10 Piercing,Heavy|Reach|Two-Handed,Attack
+Pike +1,Melee,1d10+1 Piercing,Heavy|Reach|Two-Handed,Attack
+Pike +2,Melee,1d10+2 Piercing,Heavy|Reach|Two-Handed,Attack
+Rapier,Melee,1d8 Piercing,Finesse,Attack
+Rapier +1,Melee,1d8+1 Piercing,Finesse,Attack
+Rapier +2,Melee,1d8+2 Piercing,Finesse,Attack
+Scimitar,Melee,1d6 Slashing,Finesse|Light,Attack
+Scimitar +1,Melee,1d6+1 Slashing,Finesse|Light,Attack
+Scimitar +2,Melee,1d6+2 Slashing,Finesse|Light,Attack
+Shortsword,Melee,1d6 Piercing,Finesse|Light,Attack
+Shortsword +1,Melee,1d6+1 Piercing,Finesse|Light,Attack
+Shortsword +2,Melee,1d6+2 Piercing,Finesse|Light,Attack
+Trident,Melee,1d6 Piercing,Thrown (range 20/60)|Versatile (1d8),Attack
+Trident +1,Melee,1d6+1 Piercing,Thrown (range 20/60)|Versatile (1d8),Attack
+Trident +2,Melee,1d6+2 Piercing,Thrown (range 20/60)|Versatile (1d8),Attack
+War pick,Melee,1d8 Piercing,,Attack
+War pick +1,Melee,1d8+1 Piercing,,Attack
+War pick +2,Melee,1d8+2 Piercing,,Attack
+Warhammer,Melee,1d8 Bludgeoning,Versatile (1d10),Attack
+Warhammer +1,Melee,1d8+1 Bludgeoning,Versatile (1d10),Attack
+Warhammer +2,Melee,1d8+2 Bludgeoning,Versatile (1d10),Attack
+Whip,Melee,1d4 Slashing,Finesse|Reach,Attack
+Whip +1,Melee,1d4+1 Slashing,Finesse|Reach,Attack
+Whip,Melee,1d4 Slashing,Finesse|Reach,Attack
