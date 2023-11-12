@@ -100,6 +100,10 @@ func SetupDB() {
 	for _, option := range spellOptions {
 		db.Save(&Option{Name: option[0], Type: option[1], Description: option[2]})
 	}
+	featOptions := readCSVData("data/players_handbook/options/feats.csv")
+	for _, option := range featOptions {
+		db.Save(&Option{Name: option[0], Type: option[1], Description: option[2]})
+	}
 
 	filepath.Walk("data/players_handbook/options/classes", func(path string, file os.FileInfo, err error) error {
 		if err != nil {

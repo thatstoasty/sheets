@@ -67,6 +67,7 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 	feats := strings.Split(character.Feats, ",")
 	var featRecords []Feat
 	_ = db.Find(&featRecords, "name in ?", feats)
+	log.Println(featRecords)
 
 	allClassInfo := strings.Split(character.Class, ",")
 	var classInfo []ClassInfo
@@ -103,6 +104,7 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 		options = append(options, classFeatureOptions...)
 	}
 
+	log.Println(options)
 	var optionRecords []Option
 	_ = db.Find(&optionRecords, "name in ?", options)
 
@@ -125,6 +127,9 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 	equipped = append(equipped, weapons...)
 	equipped = append(equipped, gear...)
 
+	log.Println(actions)
+	log.Println(bonusActions)
+	log.Println(passives)
 	log.Println(weapons)
 	log.Println(gear)
 	log.Println(equipped)
