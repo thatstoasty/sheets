@@ -60,6 +60,14 @@
                 </tbody>
             </table>
         </div>
+        <div class="column">
+            <table>
+                <tbody id="table-reactions">
+                    <th>Reactions</th>
+                    {{range .Reactions}} {{ template "row.html". }} {{end}}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {{end}}

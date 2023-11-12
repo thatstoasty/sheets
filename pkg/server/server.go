@@ -37,6 +37,7 @@ type CharacterInfo struct {
 	Actions      []string
 	BonusActions []string
 	Passives     []string
+	Reactions    []string
 	Items        []string
 	Equipped     []string
 }
@@ -111,6 +112,7 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 	var actions []string
 	var bonusActions []string
 	var passives []string
+	var reactions []string
 
 	for _, opt := range optionRecords {
 		switch {
@@ -120,6 +122,8 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 			bonusActions = append(bonusActions, opt.Name)
 		case opt.Type == "Passive":
 			passives = append(passives, opt.Name)
+		case opt.Type == "Reaction":
+			reactions = append(reactions, opt.Name)
 		}
 	}
 
@@ -149,6 +153,7 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 		Actions:      actions,
 		BonusActions: bonusActions,
 		Passives:     passives,
+		Reactions:    reactions,
 		Items:        items,
 		Equipped:     equipped,
 	}
