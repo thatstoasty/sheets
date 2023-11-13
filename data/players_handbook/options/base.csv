@@ -2,6 +2,7 @@ Darkvision,Passive,It's an passive
 Attack,Action,It's an action
 Ranged Attack,Action,It's an action
 Unarmed Attack,Action,It's an action
+Opportunity Attack,Reaction,Attack of Opportunity
 Grapple,Action,It's an action
 Shove,Action,It's an action
 Dash,Action,It's an action

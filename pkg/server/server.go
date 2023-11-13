@@ -22,24 +22,31 @@ type ClassInfo struct {
 	SubClass string
 }
 
+type ResourceWithDescription struct {
+	Name        string
+	Description string
+}
+
 type CharacterInfo struct {
-	Name         string
-	Race         string
-	HP           string
-	Proficiency  string
-	Strength     string
-	Dexterity    string
-	Constitution string
-	Intelligence string
-	Wisdom       string
-	Charisma     string
-	ClassInfo    []ClassInfo
-	Actions      []string
-	BonusActions []string
-	Passives     []string
-	Reactions    []string
-	Items        []string
-	Equipped     []string
+	Name             string
+	Race             string
+	HP               string
+	Proficiency      string
+	Strength         string
+	Dexterity        string
+	Constitution     string
+	Intelligence     string
+	Wisdom           string
+	Charisma         string
+	ClassInfo        []ClassInfo
+	Actions          []ResourceWithDescription
+	BonusActions     []ResourceWithDescription
+	Passives         []ResourceWithDescription
+	Reactions        []ResourceWithDescription
+	FreeActions      []ResourceWithDescription
+	NonCombatActions []ResourceWithDescription
+	Items            []ResourceWithDescription
+	Equipped         []ResourceWithDescription
 }
 
 func GetIndex(c echo.Context) error {
@@ -109,53 +116,64 @@ func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
 	var optionRecords []Option
 	_ = db.Find(&optionRecords, "name in ?", options)
 
-	var actions []string
-	var bonusActions []string
-	var passives []string
-	var reactions []string
+	var actions []ResourceWithDescription
+	var bonusActions []ResourceWithDescription
+	var passives []ResourceWithDescription
+	var reactions []ResourceWithDescription
+	var freeActions []ResourceWithDescription
+	var nonCombatActions []ResourceWithDescription
 
 	for _, opt := range optionRecords {
 		switch {
 		case opt.Type == "Action":
-			actions = append(actions, opt.Name)
+			actions = append(actions, ResourceWithDescription{opt.Name, opt.Description})
 		case opt.Type == "BonusAction":
-			bonusActions = append(bonusActions, opt.Name)
+			bonusActions = append(bonusActions, ResourceWithDescription{opt.Name, opt.Description})
 		case opt.Type == "Passive":
-			passives = append(passives, opt.Name)
+			passives = append(passives, ResourceWithDescription{opt.Name, opt.Description})
 		case opt.Type == "Reaction":
-			reactions = append(reactions, opt.Name)
+			reactions = append(reactions, ResourceWithDescription{opt.Name, opt.Description})
+		case opt.Type == "FreeAction":
+			freeActions = append(freeActions, ResourceWithDescription{opt.Name, opt.Description})
+		case opt.Type == "NonCombatAction":
+			nonCombatActions = append(nonCombatActions, ResourceWithDescription{opt.Name, opt.Description})
 		}
 	}
 
-	var equipped []string
-	equipped = append(equipped, weapons...)
-	equipped = append(equipped, gear...)
+	var itemsWithDescription []ResourceWithDescription
+	for _, item := range itemRecords {
+		itemsWithDescription = append(itemsWithDescription, ResourceWithDescription{item.Name, item.Description})
+	}
 
-	log.Println(actions)
-	log.Println(bonusActions)
-	log.Println(passives)
-	log.Println(weapons)
-	log.Println(gear)
-	log.Println(equipped)
+	var equippedWithDescription []ResourceWithDescription
+	for _, weapon := range weaponRecords {
+		equippedWithDescription = append(equippedWithDescription, ResourceWithDescription{weapon.Name, weapon.Description})
+	}
+
+	for _, gear := range gearRecords {
+		equippedWithDescription = append(equippedWithDescription, ResourceWithDescription{gear.Name, gear.Description})
+	}
 
 	characterInfo := CharacterInfo{
-		Name:         character.Name,
-		Race:         character.Race,
-		HP:           character.HP,
-		Proficiency:  character.Proficiency,
-		Strength:     character.Strength,
-		Dexterity:    character.Dexterity,
-		Constitution: character.Constitution,
-		Intelligence: character.Intelligence,
-		Wisdom:       character.Wisdom,
-		Charisma:     character.Charisma,
-		ClassInfo:    classInfo,
-		Actions:      actions,
-		BonusActions: bonusActions,
-		Passives:     passives,
-		Reactions:    reactions,
-		Items:        items,
-		Equipped:     equipped,
+		Name:             character.Name,
+		Race:             character.Race,
+		HP:               character.HP,
+		Proficiency:      character.Proficiency,
+		Strength:         character.Strength,
+		Dexterity:        character.Dexterity,
+		Constitution:     character.Constitution,
+		Intelligence:     character.Intelligence,
+		Wisdom:           character.Wisdom,
+		Charisma:         character.Charisma,
+		ClassInfo:        classInfo,
+		Actions:          actions,
+		BonusActions:     bonusActions,
+		Passives:         passives,
+		Reactions:        reactions,
+		FreeActions:      freeActions,
+		NonCombatActions: nonCombatActions,
+		Items:            itemsWithDescription,
+		Equipped:         equippedWithDescription,
 	}
 
 	return characterInfo
@@ -286,6 +304,8 @@ func Start() {
 
 	server.GET("/", GetIndex)
 	server.File("/css/output.css", "css/output.css")
+	server.File("/favicon.ico", "content/favicon.ico")
+	server.File("/content/gun.png", "content/gun.png")
 
 	//// character
 	server.POST("/character", SubmitCharacter)

@@ -19,21 +19,49 @@
         </div>
     </div>
 
-    <div class="border">
-        <table>
-            <tbody id="table-inventory">
-                <th>Inventory</th>
-                {{range .Items}} {{ template "row.html". }} {{end}}
-            </tbody>
-        </table>
+    <div id="flex-container">
+        <div class="column">
+            <table>
+                <tbody id="table-inventory">
+                    <th>Inventory</th>
+                    {{range .Items}} {{ template "row.html". }} {{end}}
+                </tbody>
+            </table>
+        </div>
+        <div class="column">
+            <table>
+                <tbody id="table-equipped">
+                    <th>Equipped</th>
+                    {{range .Equipped}} {{ template "row.html". }} {{end}}
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="border">
-        <table>
-            <tbody id="table-equipped">
-                <th>Equipped</th>
-                {{range .Equipped}} {{ template "row.html". }} {{end}}
-            </tbody>
-        </table>
+    <div id="flex-container">
+        <div class="column">
+            <table>
+                <tbody id="table-passives">
+                    <th>Passives</th>
+                    {{range .Passives}} {{ template "row.html". }} {{end}}
+                </tbody>
+            </table>
+        </div>
+        <div class="column">
+            <table>
+                <tbody id="table-free-actions">
+                    <th>Free Actions</th>
+                    {{range .FreeActions}} {{ template "row.html". }} {{end}}
+                </tbody>
+            </table>
+        </div>
+        <div class="column">
+            <table>
+                <tbody id="table-non-combat-actions">
+                    <th>Non Combat Actions</th>
+                    {{range .NonCombatActions}} {{ template "row.html". }} {{end}}
+                </tbody>
+            </table>
+        </div>
     </div>
     <div id="flex-container">
         <div class="column">
@@ -49,14 +77,6 @@
                 <tbody id="table-bonus">
                     <th>Bonus Actions</th>
                     {{range .BonusActions}} {{ template "row.html". }} {{end}}
-                </tbody>
-            </table>
-        </div>
-        <div class="column">
-            <table>
-                <tbody id="table-passives">
-                    <th>Passives</th>
-                    {{range .Passives}} {{ template "row.html". }} {{end}}
                 </tbody>
             </table>
         </div>

@@ -41,14 +41,14 @@ Glaive,Melee,1d10 Slashing,Heavy|Reach|Two-Handed,Attack
 Glaive +1,Melee,1d10+1 Slashing,Heavy|Reach|Two-Handed,Attack
 Glaive +2,Melee,1d10+2 Slashing,Heavy|Reach|Two-Handed,Attack
 Greataxe,Melee,1d12 Slashing,Heavy|Two-Handed,Attack
-Greataxe +1,Melee,1d12 Slashing,Heavy|Two-Handed,Attack
-Greataxe +2,Melee,1d12 Slashing,Heavy|Two-Handed,Attack
+Greataxe +1,Melee,1d12+1 Slashing,Heavy|Two-Handed,Attack
+Greataxe +2,Melee,1d12+2 Slashing,Heavy|Two-Handed,Attack
 Greatsword,Melee,2d6 Slashing,Heavy|Two-Handed,Attack
-Greatsword +1,Melee,2d6 Slashing,Heavy|Two-Handed,Attack
-Greatsword +2,Melee,2d6 Slashing,Heavy|Two-Handed,Attack
-Halberd,Melee,Slashing,Heavy|Reach|Two-Handed,Attack
-Halberd +1,Melee,Slashing,Heavy|Reach|Two-Handed,Attack
-Halberd +2,Melee,Slashing,Heavy|Reach|Two-Handed,Attack
+Greatsword +1,Melee,2d6+1 Slashing,Heavy|Two-Handed,Attack
+Greatsword +2,Melee,2d6+2 Slashing,Heavy|Two-Handed,Attack
+Halberd,Melee,1d10 Slashing,Heavy|Reach|Two-Handed,Attack
+Halberd +1,Melee,1d10+1 Slashing,Heavy|Reach|Two-Handed,Attack
+Halberd +2,Melee,1d10+2 Slashing,Heavy|Reach|Two-Handed,Attack
 Lance,Melee,1d12 Piercing,Reach|Special,Attack
 Lance +1,Melee,1d12 Piercing,Reach|Special,Attack
 Lance +2,Melee,1d12 Piercing,Reach|Special,Attack

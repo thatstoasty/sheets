@@ -199,3 +199,32 @@ tbody tr:nth-child(odd) {
     width: 100%;
     height: 100%;
 }
+
+.centered{
+    border-style: solid;
+    border-width:thin;
+    padding: 5px;
+    text-align: center;
+}
+
+.IMAGE-button {
+    display: inline-block;
+    height: 134px;
+    padding: 0;
+    margin: 0;
+    vertical-align: top;
+    width: 104px;
+}
+
+#close-image img {
+    display: block;
+    height: 130px;
+    width: 100px;
+}
+
+#close-CSS {
+    background-image: url( './content/skill.jpg' );
+    background-size: 100px 130px;
+    height: 134px;
+    width: 104px;
+}
