@@ -1,43 +1,43 @@
-Blessings of Knowledge,Cleric,Knowledge Domain,1,Blessings of Knowledge
-Life Domain Cleric: Bonus Proficiencies,Cleric,Life Domain,1,Life Domain Cleric: Bonus Proficiencies
-Disciple of Life,Cleric,Life Domain,1,Disciple of Life
-Light Domain Cleric: Bonus Cantrip,Cleric,Light Domain,1,Light Domain Cleric: Bonus Cantrip
-Warding Flare,Cleric,Light Domain,1,Warding Flare
-Nature Domain Cleric: Bonus Proficiencies,Cleric,Nature Domain,1,Nature Domain Cleric: Bonus Proficiencies
-Acolyte of Nature,Cleric,Nature Domain,1,Acolyte of Nature
-Tempest Domain Cleric: Bonus Proficiencies,Cleric,Tempest Domain,1,Tempest Domain Cleric: Bonus Proficiencies
-Wrath of the Storm,Cleric,Tempest Domain,1,Wrath of the Storm
-Blessing of the Trickster,Cleric,Trickery Domain,1,Blessing of the Trickster
-War Priest,Cleric,War Domain,1,War Priest
-Channel Divinity: Turn Undead,Cleric,Base,2,Channel Divinity: Turn Undead
-Channel Divinity: Knowledge of the Ages,Cleric,Knowledge Domain,2,Channel Divinity: Knowledge of the Ages
-Channel Divinity: Radiance of the Dawn,Cleric,Life Domain,2,Channel Divinity: Radiance of the Dawn
-Channel Divinity: Preserve Life,Cleric,Light Domain,2,Channel Divinity: Preserve Life
-Channel Divinity: Charm Animals and Plants,Cleric,Nature Domain,2,Channel Divinity: Charm Animals and Plants
-Channel Divinity: Destructive Wrath,Cleric,Tempest Domain,2,Channel Divinity: Destructive Wrath
-Channel Divinity: Invoke Duplicity,Cleric,Trickery Domain,2,Channel Divinity: Invoke Duplicity
-Channel Divinity: Guided Strike,Cleric,War Domain,2,Channel Divinity: Guided Strike
-Harness Divine Power,Cleric,Base,2,Harness Divine Power
-Destroy Undead,Cleric,Base,5,Destroy Undead
-Channel Divinity: Read Thoughts,Cleric,Knowledge Domain,6,Channel Divinity: Read Thoughts
-Blessed Healer,Cleric,Life Domain,6,Blessed Healer
-Dampen Elements,Cleric,Nature Domain,6,Dampen Elements
-Thunderous Strike,Cleric,Tempest Domain,6,Thunderous Strike
-Channel Divinity: Cloak of Shadows,Cleric,Trickery Domain,6,Channel Divinity: Cloak of Shadows
-Channel Divinity: War God's Blessing,Cleric,War Domain,6,Channel Divinity: War God's Blessing
-Blessed Strikes,Cleric,Base,8,Blessed Strikes
-Potent Spellcasting,Cleric,Knowledge Domain,8,Potent Spellcasting
-Divine Strike,Cleric,Life Domain,8,Divine Strike
-Potent Spellcasting,Cleric,Light Domain,8,Potent Spellcasting
-Divine Strike,Cleric,Nature Domain,8,Divine Strike
-Divine Strike,Cleric,Tempest Domain,8,Divine Strike
-Divine Strike,Cleric,Trickery Domain,8,Divine Strike
-Divine Strike,Cleric,War Domain,8,Divine Strike
-Divine Intervention,Cleric,Base,10,Divine Intervention
-Visions of the Past,Cleric,Knowledge Domain,17,Visions of the Past
-Supreme Healing,Cleric,Life Domain,17,Supreme Healing
-Corona of Light,Cleric,Light Domain,17,Corona of Light
-Master of Nature,Cleric,Nature Domain,17,Master of Nature
-Stormborn,Cleric,Tempest Domain,17,Stormborn
-Improved Duplicity,Cleric,Trickery Domain,17,Improved Duplicity
-Avatar of Battle,Cleric,War Domain,17,Avatar of Battle
+Blessings of Knowledge,NoChoice,Cleric,Knowledge Domain,1,Blessings of Knowledge
+Life Domain Cleric: Bonus Proficiencies,NoChoice,Cleric,Life Domain,1,Life Domain Cleric: Bonus Proficiencies
+Disciple of Life,NoChoice,Cleric,Life Domain,1,Disciple of Life
+Light Domain Cleric: Bonus Cantrip,NoChoice,Cleric,Light Domain,1,Light Domain Cleric: Bonus Cantrip
+Warding Flare,NoChoice,Cleric,Light Domain,1,Warding Flare
+Nature Domain Cleric: Bonus Proficiencies,NoChoice,Cleric,Nature Domain,1,Nature Domain Cleric: Bonus Proficiencies
+Acolyte of Nature,NoChoice,Cleric,Nature Domain,1,Acolyte of Nature
+Tempest Domain Cleric: Bonus Proficiencies,NoChoice,Cleric,Tempest Domain,1,Tempest Domain Cleric: Bonus Proficiencies
+Wrath of the Storm,NoChoice,Cleric,Tempest Domain,1,Wrath of the Storm
+Blessing of the Trickster,NoChoice,Cleric,Trickery Domain,1,Blessing of the Trickster
+War Priest,NoChoice,Cleric,War Domain,1,War Priest
+Channel Divinity: Turn Undead,NoChoice,Cleric,Base,2,Channel Divinity: Turn Undead
+Channel Divinity: Knowledge of the Ages,NoChoice,Cleric,Knowledge Domain,2,Channel Divinity: Knowledge of the Ages
+Channel Divinity: Radiance of the Dawn,NoChoice,Cleric,Life Domain,2,Channel Divinity: Radiance of the Dawn
+Channel Divinity: Preserve Life,NoChoice,Cleric,Light Domain,2,Channel Divinity: Preserve Life
+Channel Divinity: Charm Animals and Plants,NoChoice,Cleric,Nature Domain,2,Channel Divinity: Charm Animals and Plants
+Channel Divinity: Destructive Wrath,NoChoice,Cleric,Tempest Domain,2,Channel Divinity: Destructive Wrath
+Channel Divinity: Invoke Duplicity,NoChoice,Cleric,Trickery Domain,2,Channel Divinity: Invoke Duplicity
+Channel Divinity: Guided Strike,NoChoice,Cleric,War Domain,2,Channel Divinity: Guided Strike
+Harness Divine Power,NoChoice,Cleric,Base,2,Harness Divine Power
+Destroy Undead,NoChoice,Cleric,Base,5,Destroy Undead
+Channel Divinity: Read Thoughts,NoChoice,Cleric,Knowledge Domain,6,Channel Divinity: Read Thoughts
+Blessed Healer,NoChoice,Cleric,Life Domain,6,Blessed Healer
+Dampen Elements,NoChoice,Cleric,Nature Domain,6,Dampen Elements
+Thunderous Strike,NoChoice,Cleric,Tempest Domain,6,Thunderous Strike
+Channel Divinity: Cloak of Shadows,NoChoice,Cleric,Trickery Domain,6,Channel Divinity: Cloak of Shadows
+Channel Divinity: War God's Blessing,NoChoice,Cleric,War Domain,6,Channel Divinity: War God's Blessing
+Blessed Strikes,NoChoice,Cleric,Base,8,Blessed Strikes
+Potent Spellcasting,NoChoice,Cleric,Knowledge Domain,8,Potent Spellcasting
+Divine Strike,NoChoice,Cleric,Life Domain,8,Divine Strike
+Potent Spellcasting,NoChoice,Cleric,Light Domain,8,Potent Spellcasting
+Divine Strike,NoChoice,Cleric,Nature Domain,8,Divine Strike
+Divine Strike,NoChoice,Cleric,Tempest Domain,8,Divine Strike
+Divine Strike,NoChoice,Cleric,Trickery Domain,8,Divine Strike
+Divine Strike,NoChoice,Cleric,War Domain,8,Divine Strike
+Divine Intervention,NoChoice,Cleric,Base,10,Divine Intervention
+Visions of the Past,NoChoice,Cleric,Knowledge Domain,17,Visions of the Past
+Supreme Healing,NoChoice,Cleric,Life Domain,17,Supreme Healing
+Corona of Light,NoChoice,Cleric,Light Domain,17,Corona of Light
+Master of Nature,NoChoice,Cleric,Nature Domain,17,Master of Nature
+Stormborn,NoChoice,Cleric,Tempest Domain,17,Stormborn
+Improved Duplicity,NoChoice,Cleric,Trickery Domain,17,Improved Duplicity
+Avatar of Battle,NoChoice,Cleric,War Domain,17,Avatar of Battle

@@ -1,23 +1,23 @@
-Rage,Barbarian,Base,1,Rage
-Unarmored Defense,Barbarian,Base,1,Unarmored Defense
-Reckless Attack,Barbarian,Base,2,Reckless Attack
-Danger Sense,Barbarian,Base,2,Danger Sense
-Primal Knowledge,Barbarian,Base,2,Primal Knowledge
-Frenzy,Barbarian,Path of the Berserker,3,Frenzy
-Spirit Seeker,Barbarian,Path of the Totem Warrior,3,Spirit Seeker
-Totem Spirit,Barbarian,Path of the Totem Warrior,3,Totem Spirit
-Extra Attack,Barbarian,Base,5,Extra Attack
-Fast Movement,Barbarian,Base,5,Fast Movement
-Mindless Rage,Barbarian,Path of the Berserker,6,Mindless Rage
-Aspect of the Beast,Barbarian,Path of the Totem Warrior,6,Aspect of the Beast
-Feral Instinct,Barbarian,Base,7,Feral Instinct
-Instinctive Pounce,Barbarian,Base,7,Instinctive Pounce
-Brutal Critical,Barbarian,Base,9,Brutal Critical
-Intimidating Presence,Barbarian,Path of the Berserker,10,Intimidating Presence
-Spirit Walker,Barbarian,Path of the Totem Warrior,10,Spirit Walker
-Relentless Rage,Barbarian,Base,11,Relentless Rage
-Retaliation,Barbarian,Path of the Berserker,14,Retaliation
-Totemic Attunement,Barbarian,Path of the Totem Warrior,14,Totemic Attunement
-Persistent Rage,Barbarian,Base,15,Persistent Rage
-Indomitable Might,Barbarian,Base,18,Indomitable Might
-Primal Champion,Barbarian,Base,20,Primal Champion
+Rage,NoChoice,Barbarian,Base,1,Rage
+Unarmored Defense,NoChoice,Barbarian,Base,1,Unarmored Defense
+Reckless Attack,NoChoice,Barbarian,Base,2,Reckless Attack
+Danger Sense,NoChoice,Barbarian,Base,2,Danger Sense
+Primal Knowledge,NoChoice,Barbarian,Base,2,Primal Knowledge
+Frenzy,NoChoice,Barbarian,Path of the Berserker,3,Frenzy
+Spirit Seeker,NoChoice,Barbarian,Path of the Totem Warrior,3,Spirit Seeker
+Totem Spirit,NoChoice,Barbarian,Path of the Totem Warrior,3,Totem Spirit
+Extra Attack,NoChoice,Barbarian,Base,5,Extra Attack
+Fast Movement,NoChoice,Barbarian,Base,5,Fast Movement
+Mindless Rage,NoChoice,Barbarian,Path of the Berserker,6,Mindless Rage
+Aspect of the Beast,NoChoice,Barbarian,Path of the Totem Warrior,6,Aspect of the Beast
+Feral Instinct,NoChoice,Barbarian,Base,7,Feral Instinct
+Instinctive Pounce,NoChoice,Barbarian,Base,7,Instinctive Pounce
+Brutal Critical,NoChoice,Barbarian,Base,9,Brutal Critical
+Intimidating Presence,NoChoice,Barbarian,Path of the Berserker,10,Intimidating Presence
+Spirit Walker,NoChoice,Barbarian,Path of the Totem Warrior,10,Spirit Walker
+Relentless Rage,NoChoice,Barbarian,Base,11,Relentless Rage
+Retaliation,NoChoice,Barbarian,Path of the Berserker,14,Retaliation
+Totemic Attunement,NoChoice,Barbarian,Path of the Totem Warrior,14,Totemic Attunement
+Persistent Rage,NoChoice,Barbarian,Base,15,Persistent Rage
+Indomitable Might,NoChoice,Barbarian,Base,18,Indomitable Might
+Primal Champion,NoChoice,Barbarian,Base,20,Primal Champion

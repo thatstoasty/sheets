@@ -9,6 +9,7 @@ type Option struct {
 type ClassFeature struct {
 	Name     string `gorm:"primaryKey"`
 	Class    string `gorm:"primaryKey"`
+	Type     string
 	SubClass string `gorm:"primaryKey"`
 	Level    uint32
 	Options  string

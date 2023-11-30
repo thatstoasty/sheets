@@ -66,7 +66,6 @@ func SetupDB() {
 		if err != nil {
 			log.Fatalf(err.Error())
 		}
-		fmt.Printf("File Name: %s\n", file.Name())
 
 		if !file.IsDir() {
 			weapons := readCSVData(path)
@@ -102,7 +101,6 @@ func SetupDB() {
 		if err != nil {
 			log.Fatalf(err.Error())
 		}
-		fmt.Printf("File Name: %s\n", file.Name())
 
 		if !file.IsDir() {
 			options := readCSVData(path)
@@ -129,16 +127,15 @@ func SetupDB() {
 		if err != nil {
 			log.Fatalf(err.Error())
 		}
-		fmt.Printf("File Name: %s\n", file.Name())
 
 		if !file.IsDir() {
 			classFeatures := readCSVData(path)
 			for _, classFeature := range classFeatures {
-				level, err := strconv.ParseInt(classFeature[3], 10, 32)
+				level, err := strconv.ParseInt(classFeature[4], 10, 32)
 				if err != nil {
 					panic(err)
 				}
-				db.Save(&ClassFeature{Name: classFeature[0], Class: classFeature[1], SubClass: classFeature[2], Level: uint32(level), Options: classFeature[4]})
+				db.Save(&ClassFeature{Name: classFeature[0], Class: classFeature[1], Type: classFeature[2], SubClass: classFeature[3], Level: uint32(level), Options: classFeature[5]})
 			}
 		}
 

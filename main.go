@@ -1,251 +1,122 @@
 package main
 
 import (
-	"encoding/json"
-	// "fmt"
-	"log"
-	// "strings"
-
-	// "gorm.io/driver/sqlite"
-	// "gorm.io/gorm"
-
-	// "github.com/BurntSushi/toml"
 	"fmt"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/thatstoasty/character-sheet-ui/pkg/server"
 	"os"
-	"path/filepath"
 )
 
-func convertJSONString(jsonString string, targetObj any) {
-	err := json.Unmarshal([]byte(jsonString), &targetObj)
-	if err != nil {
-		panic(err)
+func startServer() tea.Cmd {
+	return func() tea.Msg {
+		server.SetupDB()
+		server.Start()
+
+		return "Server started!"
 	}
 }
 
-func iterate(path string) {
-	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			log.Fatalf(err.Error())
+type Model struct {
+	Choices  []string         // items on the to-do list
+	Cursor   int              // which to-do list item our cursor is pointing at
+	Selected map[int]struct{} // which to-do items are selected
+}
+
+func initialModel() Model {
+	return Model{
+		// Our to-do list is a grocery list
+		Choices: []string{"Create Character", "Delete Character", "Start!"},
+
+		// A map which indicates which choices are selected. We're using
+		// the  map like a mathematical set. The keys refer to the indexes
+		// of the `choices` slice, above.
+		Selected: make(map[int]struct{}),
+	}
+}
+
+func (m Model) Init() tea.Cmd {
+	return nil
+	// return startServer
+}
+
+func (m Model) View() string {
+	// The header
+	s := "What should we buy at the market?\n\n"
+
+	// Iterate over our choices
+	for i, choice := range m.Choices {
+
+		// Is the cursor pointing at this choice?
+		cursor := " " // no cursor
+		if m.Cursor == i {
+			cursor = ">" // cursor!
 		}
-		fmt.Printf("File Name: %s\n", info.Name())
-		return nil
-	})
+
+		// Is this choice selected?
+		checked := " " // not selected
+		if _, ok := m.Selected[i]; ok {
+			checked = "x" // selected!
+		}
+
+		// Render the row
+		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+	}
+
+	// The footer
+	s += "\nPress q to quit.\n"
+
+	// Send the UI for rendering
+	return s
+}
+
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+
+	// Is it a key press?
+	case tea.KeyMsg:
+
+		// Cool, what was the actual key pressed?
+		switch msg.String() {
+
+		// These keys should exit the program.
+		case "ctrl+c", "q":
+			return m, tea.Quit
+
+		// The "up" and "k" keys move the cursor up
+		case "up", "k":
+			if m.Cursor > 0 {
+				m.Cursor--
+			}
+
+		// The "down" and "j" keys move the cursor down
+		case "down", "j":
+			if m.Cursor < len(m.Choices)-1 {
+				m.Cursor++
+			}
+
+		// The "enter" key and the spacebar (a literal space) toggle
+		// the selected state for the item that the cursor is pointing at.
+		case "enter", " ":
+			switch m.Cursor {
+			case 0:
+				return m, nil
+			case 1:
+				return m, nil
+			case 2:
+				return m, startServer()
+			}
+		}
+	}
+
+	// Return the updated model to the Bubble Tea runtime for processing.
+	// Note that we're not returning a command.
+	return m, nil
 }
 
 func main() {
-	// connect
-	// // db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	// db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-	// if err != nil {
-	// 	log.Fatal("failed to connect database")
-	// }
-
-	// // // Migrate the schema
-	// // db.AutoMigrate(&server.Class{})
-	// // db.AutoMigrate(&server.ClassFeature{})
-	// // db.AutoMigrate(&server.Race{})
-	// // db.AutoMigrate(&server.Feat{})
-	// // db.AutoMigrate(&server.Item{})
-	// // db.AutoMigrate(&server.Option{})
-	// db.AutoMigrate(&server.Character{})
-
-	// // // Create
-	// // db.Create(&server.Class{Name: "Fighter"})
-
-	// // // Read
-	// // var class server.Class
-	// // db.First(&server.Class, 1)                     // find product with integer primary key
-	// // db.First(&server.Class, "name = ?", "Fighter") // find product with code D42
-	// // log.Println(class)
-
-	// // // Delete - delete product
-	// // db.Delete(&server.Class, 1)
-
-	// // // Create classes
-	// // db.Create(&server.Class{Name: "Artificer"})
-	// // db.Create(&server.Class{Name: "Barbarian"})
-	// // db.Create(&server.Class{Name: "Bard"})
-	// // db.Create(&server.Class{Name: "Cleric"})
-	// // db.Create(&server.Class{Name: "Druid"})
-	// // db.Create(&server.Class{Name: "Fighter"})
-	// // db.Create(&server.Class{Name: "Monk"})
-	// // db.Create(&server.Class{Name: "Paladin"})
-	// // db.Create(&server.Class{Name: "Ranger"})
-	// // db.Create(&server.Class{Name: "Rogue"})
-	// // db.Create(&server.Class{Name: "Sorcerer"})
-	// // db.Create(&server.Class{Name: "Warlock"})
-	// // db.Create(&server.Class{Name: "Wizard"})
-
-	// // var classes []server.Class
-	// // _ = db.Find(&server.Classes)
-
-	// // log.Println(classes)
-
-	// // // Create Races
-	// // db.Create(&server.Race{Name: "Dwarf", Options: `["Darkvision"]`})
-
-	// // // Create Feats
-	// // db.Create(&server.Feat{Name: "Warcaster", Options: `["Cast War"]`})
-	// // db.Create(&server.Feat{Name: "Polearm Master", Options: `["Polearm Master Extra Attack"]`})
-
-	// // // Create Items
-	// // db.Create(&server.Feat{Name: "Rapier", Options: ""})
-
-	// // // Create Actions
-	// // db.Create(&server.Option{Name: "Cast War", Type: "Action"})
-
-	// // // Create Bonus Actions
-	// // db.Create(&server.Option{Name: "Polearm Master Extra Attack", Type: "Action"})
-
-	// // // Create Passives
-	// // db.Create(&server.Option{Name: "Darkvision", Type: "Action"})
-
-	// // // var options []Option
-	// // // _ = db.Find(&server.Options)
-
-	// // // log.Println(options)
-
-	// var hero server.Config
-	// _, err = toml.DecodeFile("character.toml", &hero)
-	// if err != nil {
-	//     panic(err)
-	// }
-	// log.Println(hero)
-
-	// character := server.Character{
-	// 	Name: hero.Name,
-	// 	Class: fmt.Sprintf("%+v", hero.Class),
-	// 	Race: hero.Race,
-	// 	Feats: fmt.Sprintf("%+v", hero.Feats),
-	// 	Items: fmt.Sprintf("%+v", hero.Items),
-	// }
-	// // character := server.Character{
-	// // 	Name: hero.Name,
-	// // 	Class: "[Paladin 1]",
-	// // 	Race: hero.Race,
-	// // 	Feats: `["Warcaster"]`,
-	// // 	Items: `["Rapier"]`,
-	// // }
-	// // character := server.Character{
-	// // 	Name:  "Mikhail",
-	// // 	Class: `[{"Class": "Paladin", "Level": 1}]`,
-	// // 	Race:  "Dwarf",
-	// // 	Feats: `["Warcaster"]`,
-	// // 	Items: `["Rapier"]`,
-	// // }
-	// log.Println(character)
-	// // log.Println(server.Character{
-	// // 		Name:  "Mikhail",
-	// // 		Class: `[{"Class": "Paladin", "Level": 1}]`,
-	// // 		Race:  "Dwarf",
-	// // 		Feats: `["Warcaster"]`,
-	// // 		Items: `["Rapier"]`,
-	// // 	})
-	// db.Create(&character)
-
-	// // Create Character
-	// // db.Create(&server.Character{
-	// // 	Name:  "Mikhail",
-	// // 	Class: `[{"Class": "Paladin", "Level": 1}]`,
-	// // 	Race:  "Dwarf",
-	// // 	Feats: `["Warcaster"]`,
-	// // 	Items: `["Rapier"]`,
-	// // })
-
-	// var char server.Character
-	// db.First(&char, "name = ?", "Mikhail")
-	// log.Println(char)
-
-	// feats := strings.Split(char.Feats, ",")
-	// log.Println(feats)
-
-	// log.Println(character)
-	// var raceOptions server.Race
-	// _ = db.First(&server.RaceOptions, "name = ?", character.Race)
-
-	// var items []string
-	// // convertJSONString(character.Items, items)
-	// err = json.Unmarshal([]byte(character.Items), &items)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// var itemOptions server.Item
-	// _ = db.First(&itemOptions, "name = ?", items[0])
-
-	// var feats []string
-	// err = json.Unmarshal([]byte(character.Feats), &server.Feats)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// var featOptions server.Feat
-	// _ = db.First(&server.FeatOptions, "name = ?", feats[0])
-
-	// var featsOptions []server.Feat
-	// _ = db.Find(&server.FeatsOptions)
-	// log.Println(featsOptions)
-
-	// log.Println(raceOptions.Options)
-	// log.Println(itemOptions.Options)
-	// log.Println(featOptions.Options)
-
-	// var raceOpt []string
-	// err = json.Unmarshal([]byte(raceOptions.Options), &server.RaceOpt)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// log.Println(raceOpt[0])
-
-	// // var itemOpt []string
-	// // err = json.Unmarshal([]byte(itemOptions.Options), &itemOpt)
-	// // if err != nil {
-	// // 	panic(err)
-	// // }
-	// // log.Println(itemOpt)
-
-	// var featOpt []string
-	// err = json.Unmarshal([]byte(featOptions.Options), &server.FeatOpt)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// log.Println(featOpt[0])
-
-	// var options []string
-	// options = append(options, raceOpt...)
-	// // options = append(options, itemOpt...)
-	// options = append(options, featOpt...)
-
-	// log.Println(options)
-
-	// var optionRecords []server.Option
-	// _ = db.Find(&server.OptionRecords, "name in ?", options)
-
-	// log.Println(optionRecords)
-	// var actions []string
-	// var bonusActions []string
-	// var passives []string
-
-	// for _, opt := range optionRecords {
-	// 	switch {
-	// 	case opt.Type == "Action":
-	// 		actions = append(actions, opt.Name)
-	// 	case opt.Type == "BonusAction":
-	// 		bonusActions = append(bonusActions, opt.Name)
-	// 	case opt.Type == "Passive":
-	// 		passives = append(passives, opt.Name)
-	// 	}
-	// }
-
-	// log.Println(actions)
-	// log.Println(bonusActions)
-	// log.Println(passives)
-
-	server.SetupDB()
-	server.Start()
-
-	// currentDirectory, err := os.Getwd()
-	// if err != nil {
-	//     log.Fatal(err)
-	// }
-	// iterate(currentDirectory)
+	p := tea.NewProgram(initialModel())
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("Alas, there's been an error: %v", err)
+		os.Exit(1)
+	}
 }

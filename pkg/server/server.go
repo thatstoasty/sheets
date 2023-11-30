@@ -15,44 +15,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type ClassInfo struct {
-	Class    string
-	Level    string
-	SubClass string
-}
-
-type ResourceWithDescription struct {
-	Name        string
-	Description string
-}
-
-type ScoreWithModifier struct {
-	Score    uint8
-	Modifier int8
-}
-
-type CharacterInfo struct {
-	Name             string
-	Race             string
-	HP               uint8
-	Proficiency      uint8
-	Strength         ScoreWithModifier
-	Dexterity        ScoreWithModifier
-	Constitution     ScoreWithModifier
-	Intelligence     ScoreWithModifier
-	Wisdom           ScoreWithModifier
-	Charisma         ScoreWithModifier
-	ClassInfo        []ClassInfo
-	Actions          []Option
-	BonusActions     []Option
-	Passives         []Option
-	Reactions        []Option
-	FreeActions      []Option
-	NonCombatActions []Option
-	Items            []string
-	Equipped         []string
-}
-
 func GetIndex(c echo.Context) error {
 	return c.Render(http.StatusOK, "index", nil)
 }
@@ -79,11 +41,6 @@ func GetCharacterNames(c echo.Context) error {
 	return c.Render(http.StatusOK, "drop_down", names)
 }
 
-type OptionWithDescription struct {
-	Name        string
-	Description string
-}
-
 func GetOptionDescription(c echo.Context) error {
 	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
 	if err != nil {
@@ -108,34 +65,6 @@ func GetItemDescription(c echo.Context) error {
 
 	var option Option
 	db.Table("items").Select("description").Where("name = ?", name).First(&option)
-
-	return c.Render(http.StatusOK, "description", OptionWithDescription{name, option.Description})
-}
-
-func GetGearDescription(c echo.Context) error {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
-
-	name := c.Request().Header["Hx-Trigger-Name"][0]
-
-	var option Option
-	db.Table("gears").Select("description").Where("name = ?", name).First(&option)
-
-	return c.Render(http.StatusOK, "description", OptionWithDescription{name, option.Description})
-}
-
-func GetWeaponDescription(c echo.Context) error {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
-
-	name := c.Request().Header["Hx-Trigger-Name"][0]
-
-	var option Option
-	db.Table("weapons").Select("description").Where("name = ?", name).First(&option)
 
 	return c.Render(http.StatusOK, "description", OptionWithDescription{name, option.Description})
 }
@@ -238,8 +167,6 @@ func Start() {
 	server.GET("/character/names", GetCharacterNames)
 	server.GET("/option", GetOptionDescription)
 	server.GET("/item", GetItemDescription)
-	server.GET("/gear", GetGearDescription)
-	server.GET("/weapon", GetWeaponDescription)
 
 	// Start server
 	server.Logger.Fatal(server.Start(":1323"))

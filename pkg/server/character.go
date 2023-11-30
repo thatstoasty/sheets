@@ -9,6 +9,44 @@ import (
 	"gorm.io/gorm"
 )
 
+type ClassInfo struct {
+	Class    string
+	Level    string
+	SubClass string
+}
+
+type ScoreWithModifier struct {
+	Score    uint8
+	Modifier int8
+}
+
+type OptionWithDescription struct {
+	Name        string
+	Description string
+}
+
+type CharacterInfo struct {
+	Name             string
+	Race             string
+	HP               uint8
+	Proficiency      uint8
+	Strength         ScoreWithModifier
+	Dexterity        ScoreWithModifier
+	Constitution     ScoreWithModifier
+	Intelligence     ScoreWithModifier
+	Wisdom           ScoreWithModifier
+	Charisma         ScoreWithModifier
+	ClassInfo        []ClassInfo
+	Actions          []Option
+	BonusActions     []Option
+	Passives         []Option
+	Reactions        []Option
+	FreeActions      []Option
+	NonCombatActions []Option
+	Items            []string
+	Equipped         []string
+}
+
 func CalculateAbilityScore(score uint8) int8 {
 	abilityModifier := float64(score) - 10
 	if abilityModifier == 0 {
