@@ -1,0 +1,10 @@
+<button class="attribute-button"
+name="{{.Name}}"
+hx-get="/option"
+hx-trigger="click"
+hx-target="#description"
+hx-swap="innerHTML"
+title="{{.Name}} - {{.Description}}"
+>
+    {{.Name}}
+</button>

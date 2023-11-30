@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strings"
 	"text/template"
 
 	"github.com/BurntSushi/toml"
@@ -27,156 +26,35 @@ type ResourceWithDescription struct {
 	Description string
 }
 
+type ScoreWithModifier struct {
+	Score    uint8
+	Modifier int8
+}
+
 type CharacterInfo struct {
 	Name             string
 	Race             string
-	HP               string
-	Proficiency      string
-	Strength         string
-	Dexterity        string
-	Constitution     string
-	Intelligence     string
-	Wisdom           string
-	Charisma         string
+	HP               uint8
+	Proficiency      uint8
+	Strength         ScoreWithModifier
+	Dexterity        ScoreWithModifier
+	Constitution     ScoreWithModifier
+	Intelligence     ScoreWithModifier
+	Wisdom           ScoreWithModifier
+	Charisma         ScoreWithModifier
 	ClassInfo        []ClassInfo
-	Actions          []ResourceWithDescription
-	BonusActions     []ResourceWithDescription
-	Passives         []ResourceWithDescription
-	Reactions        []ResourceWithDescription
-	FreeActions      []ResourceWithDescription
-	NonCombatActions []ResourceWithDescription
-	Items            []ResourceWithDescription
-	Equipped         []ResourceWithDescription
+	Actions          []Option
+	BonusActions     []Option
+	Passives         []Option
+	Reactions        []Option
+	FreeActions      []Option
+	NonCombatActions []Option
+	Items            []string
+	Equipped         []string
 }
 
 func GetIndex(c echo.Context) error {
 	return c.Render(http.StatusOK, "index", nil)
-}
-
-func getCharacterOptions(db *gorm.DB, name string) CharacterInfo {
-	var character Character
-	db.First(&character, "name = ?", name)
-
-	var raceRecords []Race
-	_ = db.Find(&raceRecords, "name in ?", []string{character.Race, "Default"})
-
-	gear := []string{character.Helmet, character.Armor, character.Boots, character.Cloak, character.Jewelery1, character.Jewelery2, character.Jewelery3}
-	var gearRecords []Gear
-	_ = db.Find(&gearRecords, "name in ?", gear)
-
-	weapons := []string{character.MainHandWeapon, character.OffHandWeapon}
-	var weaponRecords []Weapon
-	_ = db.Find(&weaponRecords, "name in ?", weapons)
-
-	items := strings.Split(character.Items, ",")
-	var itemRecords []Item
-	_ = db.Find(&itemRecords, "name in ?", items)
-
-	feats := strings.Split(character.Feats, ",")
-	var featRecords []Feat
-	_ = db.Find(&featRecords, "name in ?", feats)
-	log.Println(featRecords)
-
-	allClassInfo := strings.Split(character.Class, ",")
-	var classInfo []ClassInfo
-	var allClassFeatureRecords []ClassFeature
-	for _, class := range allClassInfo {
-		classConfig := strings.Split(class, "|")
-		log.Println(classConfig)
-
-		var classFeatureRecords []ClassFeature
-		_ = db.Where("class = ? AND level <= ? AND sub_class in ?", classConfig[0], classConfig[1], []string{"Base", classConfig[2]}).Find(&classFeatureRecords)
-		allClassFeatureRecords = append(allClassFeatureRecords, classFeatureRecords...)
-		classInfo = append(classInfo, ClassInfo{Class: classConfig[0], Level: classConfig[1], SubClass: classConfig[2]})
-	}
-
-	var options []string
-
-	for _, race := range raceRecords {
-		raceOptions := strings.Split(race.Options, "|")
-		options = append(options, raceOptions...)
-	}
-
-	for _, feat := range featRecords {
-		featOptions := strings.Split(feat.Options, "|")
-		options = append(options, featOptions...)
-	}
-
-	for _, item := range itemRecords {
-		itemOptions := strings.Split(item.Options, "|")
-		options = append(options, itemOptions...)
-	}
-
-	for _, classFeature := range allClassFeatureRecords {
-		classFeatureOptions := strings.Split(classFeature.Options, "|")
-		options = append(options, classFeatureOptions...)
-	}
-
-	log.Println(options)
-	var optionRecords []Option
-	_ = db.Find(&optionRecords, "name in ?", options)
-
-	var actions []ResourceWithDescription
-	var bonusActions []ResourceWithDescription
-	var passives []ResourceWithDescription
-	var reactions []ResourceWithDescription
-	var freeActions []ResourceWithDescription
-	var nonCombatActions []ResourceWithDescription
-
-	for _, opt := range optionRecords {
-		switch {
-		case opt.Type == "Action":
-			actions = append(actions, ResourceWithDescription{opt.Name, opt.Description})
-		case opt.Type == "BonusAction":
-			bonusActions = append(bonusActions, ResourceWithDescription{opt.Name, opt.Description})
-		case opt.Type == "Passive":
-			passives = append(passives, ResourceWithDescription{opt.Name, opt.Description})
-		case opt.Type == "Reaction":
-			reactions = append(reactions, ResourceWithDescription{opt.Name, opt.Description})
-		case opt.Type == "FreeAction":
-			freeActions = append(freeActions, ResourceWithDescription{opt.Name, opt.Description})
-		case opt.Type == "NonCombatAction":
-			nonCombatActions = append(nonCombatActions, ResourceWithDescription{opt.Name, opt.Description})
-		}
-	}
-
-	var itemsWithDescription []ResourceWithDescription
-	for _, item := range itemRecords {
-		itemsWithDescription = append(itemsWithDescription, ResourceWithDescription{item.Name, item.Description})
-	}
-
-	var equippedWithDescription []ResourceWithDescription
-	for _, weapon := range weaponRecords {
-		equippedWithDescription = append(equippedWithDescription, ResourceWithDescription{weapon.Name, weapon.Description})
-	}
-
-	for _, gear := range gearRecords {
-		equippedWithDescription = append(equippedWithDescription, ResourceWithDescription{gear.Name, gear.Description})
-	}
-
-	characterInfo := CharacterInfo{
-		Name:             character.Name,
-		Race:             character.Race,
-		HP:               character.HP,
-		Proficiency:      character.Proficiency,
-		Strength:         character.Strength,
-		Dexterity:        character.Dexterity,
-		Constitution:     character.Constitution,
-		Intelligence:     character.Intelligence,
-		Wisdom:           character.Wisdom,
-		Charisma:         character.Charisma,
-		ClassInfo:        classInfo,
-		Actions:          actions,
-		BonusActions:     bonusActions,
-		Passives:         passives,
-		Reactions:        reactions,
-		FreeActions:      freeActions,
-		NonCombatActions: nonCombatActions,
-		Items:            itemsWithDescription,
-		Equipped:         equippedWithDescription,
-	}
-
-	return characterInfo
 }
 
 func GetCharacter(c echo.Context) error {
@@ -184,7 +62,7 @@ func GetCharacter(c echo.Context) error {
 	if err != nil {
 		log.Fatal("failed to connect database")
 	}
-	characterInfo := getCharacterOptions(db, c.QueryParam("name"))
+	characterInfo := GetCharacterInfo(db, c.QueryParam("name"))
 
 	return c.Render(http.StatusOK, "character", characterInfo)
 }
@@ -201,6 +79,11 @@ func GetCharacterNames(c echo.Context) error {
 	return c.Render(http.StatusOK, "drop_down", names)
 }
 
+type OptionWithDescription struct {
+	Name        string
+	Description string
+}
+
 func GetOptionDescription(c echo.Context) error {
 	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
 	if err != nil {
@@ -212,7 +95,49 @@ func GetOptionDescription(c echo.Context) error {
 	var option Option
 	db.Table("options").Select("description").Where("name = ?", name).First(&option)
 
-	return c.Render(http.StatusOK, "description", option.Description)
+	return c.Render(http.StatusOK, "description", OptionWithDescription{name, option.Description})
+}
+
+func GetItemDescription(c echo.Context) error {
+	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+	if err != nil {
+		log.Fatal("failed to connect database")
+	}
+
+	name := c.Request().Header["Hx-Trigger-Name"][0]
+
+	var option Option
+	db.Table("items").Select("description").Where("name = ?", name).First(&option)
+
+	return c.Render(http.StatusOK, "description", OptionWithDescription{name, option.Description})
+}
+
+func GetGearDescription(c echo.Context) error {
+	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+	if err != nil {
+		log.Fatal("failed to connect database")
+	}
+
+	name := c.Request().Header["Hx-Trigger-Name"][0]
+
+	var option Option
+	db.Table("gears").Select("description").Where("name = ?", name).First(&option)
+
+	return c.Render(http.StatusOK, "description", OptionWithDescription{name, option.Description})
+}
+
+func GetWeaponDescription(c echo.Context) error {
+	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+	if err != nil {
+		log.Fatal("failed to connect database")
+	}
+
+	name := c.Request().Header["Hx-Trigger-Name"][0]
+
+	var option Option
+	db.Table("weapons").Select("description").Where("name = ?", name).First(&option)
+
+	return c.Render(http.StatusOK, "description", OptionWithDescription{name, option.Description})
 }
 
 func SubmitCharacter(c echo.Context) error {
@@ -264,7 +189,7 @@ func SubmitCharacter(c echo.Context) error {
 		OffHandWeapon:  hero.OffHandWeapon,
 	})
 
-	characterInfo := getCharacterOptions(db, hero.Name)
+	characterInfo := GetCharacterInfo(db, hero.Name)
 
 	return c.Render(http.StatusOK, "character", characterInfo)
 }
@@ -312,6 +237,9 @@ func Start() {
 	server.GET("/character", GetCharacter)
 	server.GET("/character/names", GetCharacterNames)
 	server.GET("/option", GetOptionDescription)
+	server.GET("/item", GetItemDescription)
+	server.GET("/gear", GetGearDescription)
+	server.GET("/weapon", GetWeaponDescription)
 
 	// Start server
 	server.Logger.Fatal(server.Start(":1323"))

@@ -37,11 +37,8 @@ func SetupDB() {
 
 	// Migrate the schema
 	db.AutoMigrate(&ClassFeature{})
-	db.AutoMigrate(&Race{})
-	db.AutoMigrate(&Feat{})
+	db.AutoMigrate(&Characteristic{})
 	db.AutoMigrate(&Item{})
-	db.AutoMigrate(&Weapon{})
-	db.AutoMigrate(&Gear{})
 	db.AutoMigrate(&Spell{})
 	db.AutoMigrate(&Option{})
 	db.AutoMigrate(&Character{})
@@ -49,23 +46,19 @@ func SetupDB() {
 	// Create Races
 	races := readCSVData("data/players_handbook/races.csv")
 	for _, race := range races {
-		db.Save(&Race{Name: race[0], Options: race[1]})
+		db.Save(&Characteristic{Name: race[0], Options: race[1]})
 	}
 
 	// Create Feats
 	feats := readCSVData("data/players_handbook/feats.csv")
 	for _, feat := range feats {
-		db.Save(&Feat{Name: feat[0], Options: feat[1]})
+		db.Save(&Characteristic{Name: feat[0], Options: feat[1]})
 	}
 
 	// Create Items
 	items := readCSVData("data/players_handbook/items.csv")
 	for _, item := range items {
-		quantity, err := strconv.ParseInt(item[1], 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		db.Save(&Item{Name: item[0], Quantity: uint16(quantity), Description: item[2], Properties: item[3], Options: item[4]})
+		db.Save(&Item{Name: item[0], Type: item[1], Description: item[2], Properties: item[3], Options: item[4]})
 	}
 
 	// Create Weapons
@@ -78,7 +71,7 @@ func SetupDB() {
 		if !file.IsDir() {
 			weapons := readCSVData(path)
 			for _, weapon := range weapons {
-				db.Save(&Weapon{Name: weapon[0], Type: weapon[1], Description: weapon[2], Properties: weapon[3], Options: weapon[4]})
+				db.Save(&Item{Name: weapon[0], Type: weapon[1], Description: weapon[2], Properties: weapon[3], Options: weapon[4]})
 			}
 		}
 
@@ -88,7 +81,7 @@ func SetupDB() {
 	// Create Armor
 	armors := readCSVData("data/players_handbook/armor.csv")
 	for _, armor := range armors {
-		db.Save(&Gear{Name: armor[0], Type: armor[1], Description: armor[2], Properties: armor[3], Options: armor[4]})
+		db.Save(&Item{Name: armor[0], Type: armor[1], Description: armor[2], Properties: armor[3], Options: armor[4]})
 	}
 
 	// Create Options
@@ -155,14 +148,14 @@ func SetupDB() {
 	db.Save(&Character{
 		Name:         "Example",
 		Class:        "Fighter,1,",
-		HP:           "1",
-		Proficiency:  "1",
-		Strength:     "1",
-		Dexterity:    "1",
-		Constitution: "1",
-		Intelligence: "1",
-		Wisdom:       "1",
-		Charisma:     "1",
+		HP:           1,
+		Proficiency:  1,
+		Strength:     1,
+		Dexterity:    1,
+		Constitution: 1,
+		Intelligence: 1,
+		Wisdom:       1,
+		Charisma:     1,
 		Race:         "Dwarf",
 		Feats:        "",
 		Items:        "",

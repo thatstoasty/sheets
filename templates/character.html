@@ -1,92 +1,118 @@
 {{define "character"}}
 <div class="border">
-    <h2>{{.Name}}</h2>
-    <div class="row">
-        <div class="column">
-            Proficiency Bonus:  {{.Proficiency}}<br />
-            Strength:           {{.Strength}}<br />
-            Dexterity:          {{.Dexterity}}<br />
-            Constitution:       {{.Constitution}}<br />
-            Intelligence:       {{.Intelligence}}<br />
-            Wisdom:             {{.Wisdom}}<br />
-            Charisma:           {{.Wisdom}}<br />
+    <div class="site-container">
+        <div class="grid-header">
+            {{.Name}}
         </div>
 
-        <div class="column">
-            Race: {{.Race}}
+        <div class="grid-scores">
+            <div class="grid-strength">
+                {{.Strength.Modifier}}<br />
+                {{.Strength.Score}}<br />
+                <b>Strength</b>
+            </div>
+            <div class="grid-dexterity">
+                {{.Dexterity.Modifier}}<br />
+                {{.Dexterity.Score}}<br />
+                <b>Dexterity</b>
+            </div>
+            <div class="grid-constitution">
+                {{.Constitution.Modifier}}<br />
+                {{.Constitution.Score}}<br />
+                <b>Constitution</b>
+            </div>
+            <div class="grid-intelligence">
+                {{.Intelligence.Modifier}}<br />
+                {{.Intelligence.Score}}<br />
+                <b>Intelligence</b>
+            </div>
+            <div class="grid-wisdom">
+                {{.Wisdom.Modifier}}<br />
+                {{.Wisdom.Score}}<br />
+                <b>Wisdom</b>
+            </div>
+            <div class="grid-charisma">
+                {{.Charisma.Modifier}}<br />
+                {{.Charisma.Score}}<br />
+                <b>Charisma</b>
+            </div>
+            <div class="grid-proficiency">
+                +{{.Proficiency}}<br />
+                <b>Proficiency Bonus</b>
+            </div>
+        </div>
+
+        <div class="grid-race">
+            {{.Race}}
             <br />
             {{range .ClassInfo}} {{ template "class_info.html". }} {{end}}
         </div>
-    </div>
 
-    <div id="flex-container">
-        <div class="column">
-            <table>
-                <tbody id="table-inventory">
-                    <th>Inventory</th>
-                    {{range .Items}} {{ template "row.html". }} {{end}}
-                </tbody>
-            </table>
+        <div class="grid-inventory">
+            <h2>Inventory</h2>
+            <div class="grid-container">
+                {{range .Items}} {{ template "grid_box_items.html". }} {{end}}
+            </div>
         </div>
-        <div class="column">
-            <table>
-                <tbody id="table-equipped">
-                    <th>Equipped</th>
-                    {{range .Equipped}} {{ template "row.html". }} {{end}}
-                </tbody>
-            </table>
+
+        <div class="grid-equipped">
+            <h2>Equipped</h2>
+            <div class="grid-container">
+                {{range .Equipped}} {{ template "grid_box_gear.html". }} {{end}}
+            </div>
         </div>
-    </div>
-    <div id="flex-container">
-        <div class="column">
-            <table>
-                <tbody id="table-passives">
-                    <th>Passives</th>
-                    {{range .Passives}} {{ template "row.html". }} {{end}}
-                </tbody>
-            </table>
+
+        <div class="grid-description" id="description", name="description">
+            Click on an option and the description will appear here!
         </div>
-        <div class="column">
-            <table>
-                <tbody id="table-free-actions">
-                    <th>Free Actions</th>
-                    {{range .FreeActions}} {{ template "row.html". }} {{end}}
-                </tbody>
-            </table>
+
+        <div class="grid-actions">
+            <div class="border">
+                <h2>Actions</h2>
+                <div class="grid-container">
+                    {{range .Actions}} {{ template "grid_box.html". }} {{end}}
+                </div>
+            </div>
         </div>
-        <div class="column">
-            <table>
-                <tbody id="table-non-combat-actions">
-                    <th>Non Combat Actions</th>
-                    {{range .NonCombatActions}} {{ template "row.html". }} {{end}}
-                </tbody>
-            </table>
+        <div class="grid-bonusactions">
+            <div class="border">
+                <h2>Bonus Actions</h2>
+                <div class="grid-container">
+                    {{range .BonusActions}} {{ template "grid_box.html". }} {{end}}
+                </div>
+            </div>
         </div>
-    </div>
-    <div id="flex-container">
-        <div class="column">
-            <table>
-                <tbody id="table-actions">
-                    <th>Actions</th>
-                    {{range .Actions}} {{ template "row.html". }} {{end}}
-                </tbody>
-            </table>
+        <div class="grid-reactions">
+            <div class="border">
+                <h2>Reactions</h2>
+                <div class="grid-container">
+                    {{range .Reactions}} {{ template "grid_box.html". }} {{end}}
+                </div>
+            </div>
         </div>
-        <div class="column">
-            <table>
-                <tbody id="table-bonus">
-                    <th>Bonus Actions</th>
-                    {{range .BonusActions}} {{ template "row.html". }} {{end}}
-                </tbody>
-            </table>
+        <div class="grid-passives">
+            <div class="border">
+                <h2>Passives</h2>
+                <div class="grid-container">
+                    {{range .Passives}} {{ template "grid_box.html". }} {{end}}
+                </div>
+            </div>
         </div>
-        <div class="column">
-            <table>
-                <tbody id="table-reactions">
-                    <th>Reactions</th>
-                    {{range .Reactions}} {{ template "row.html". }} {{end}}
-                </tbody>
-            </table>
+        <div class="grid-freeactions">
+            <div class="border">
+                <h2>Free Actions</h2>
+                <div class="grid-container">
+                    {{range .FreeActions}} {{ template "grid_box.html". }} {{end}}
+                </div>
+            </div>
+        </div>
+        <div class="grid-noncombatactions">
+            <div class="border">
+                <h2>Non Combat Actions</h2>
+                <div class="grid-container">
+                    {{range .NonCombatActions}} {{ template "grid_box.html". }} {{end}}
+                </div>
+            </div>
         </div>
     </div>
 </div>

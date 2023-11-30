@@ -183,7 +183,7 @@ tbody tr:nth-child(odd) {
 
 .border {
     border-style: solid;
-    border-width:thin;
+    border-width: thin;
     padding: 5px;
 }
 
@@ -207,24 +207,162 @@ tbody tr:nth-child(odd) {
     text-align: center;
 }
 
-.IMAGE-button {
-    display: inline-block;
-    height: 134px;
-    padding: 0;
-    margin: 0;
-    vertical-align: top;
-    width: 104px;
+.attribute-button {
+    height: 85px;
+    width: 85px;
+    font-size: 11px;
 }
 
-#close-image img {
-    display: block;
-    height: 130px;
-    width: 100px;
+.wrapper {
+    /* width: 600px; */
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: repeat(4, 80px);
+    grid-template-rows: repeat(6, 80px);
+    grid-auto-flow: column;
+    flex: 33%;
+    padding: 5px;
+    float: left;
 }
 
-#close-CSS {
-    background-image: url( './content/skill.jpg' );
-    background-size: 100px 130px;
-    height: 134px;
-    width: 104px;
+.grid-container {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 2px;
+    row-gap: 2px;
+
+    grid-template-areas:
+          "a a2 a3"
+          "b b2 b3"
+          "c c2 c3"
+          "d d2 d3"
+          "e e2 e3"
+          "f f2 f3"
+          "g g2 g3";
+}
+
+.grid-header {
+    grid-area: header;
+    padding: 5px;
+    justify-self: start;
+    font-size: 75px;
+}
+
+.grid-scores {
+    grid-area: attributes;
+    padding: 5px;
+    display: grid;
+
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    column-gap: 2px;
+    row-gap: 2px;
+
+    grid-template-areas:
+          "strength dexterity constitution intelligence wisdom charisma proficiency";
+}
+
+.grid-strength {
+    grid-area: strength;
+    padding: 5px;
+}
+
+.grid-dexterity {
+    grid-area: dexterity;
+    padding: 5px;
+}
+
+.grid-constitution {
+    grid-area: constitution;
+    padding: 5px;
+}
+
+.grid-intelligence {
+    grid-area: intelligence;
+    padding: 5px;
+}
+
+.grid-wisdom {
+    grid-area: wisdom;
+    padding: 5px;
+}
+
+.grid-charisma {
+    grid-area: charisma;
+    padding: 5px;
+}
+
+.grid-proficiency {
+    grid-area: proficiency;
+    padding: 5px;
+}
+
+.grid-race {
+    grid-area: race;
+    padding: 5px;
+    font-size: 15px;
+    justify-self: start;
+    text-align: left;
+}
+
+.grid-inventory {
+    grid-area: inventory;
+    padding: 5px;
+}
+
+.grid-equipped {
+    grid-area: equipped;
+    padding: 5px;
+}
+
+.grid-description {
+    grid-area: description;
+    border-style: solid;
+    border-width: thin;
+    padding: 5px;
+}
+
+.grid-actions {
+    grid-area: actions;
+    padding: 5px;
+}
+
+.grid-bonusactions {
+    grid-area: bonusactions;
+    padding: 5px;
+}
+
+.grid-reactions {
+    grid-area: reactions;
+    padding: 5px;
+}
+
+.grid-passives {
+    grid-area: passives;
+    padding: 5px;
+}
+
+.grid-freeactions {
+    grid-area: freeactions;
+    padding: 5px;
+}
+
+.grid-noncombatactions {
+    grid-area: noncombatactions;
+    padding: 5px;
+}
+
+.site-container {
+    display: grid;
+    padding: 5px;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "header race . ."
+        "attributes attributes attributes attributes"
+        "inventory inventory equipped equipped"
+        "actions bonusactions reactions description"
+        "passives freeactions noncombatactions description";
 }

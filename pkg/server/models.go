@@ -14,34 +14,13 @@ type ClassFeature struct {
 	Options  string
 }
 
-type Race struct {
-	Name    string `gorm:"primaryKey"`
-	Options string
-}
-
-type Feat struct {
+type Characteristic struct {
 	Name        string `gorm:"primaryKey"`
 	Description string
 	Options     string
 }
 
 type Item struct {
-	Name        string `gorm:"primaryKey"`
-	Quantity    uint16
-	Description string
-	Properties  string
-	Options     string
-}
-
-type Weapon struct {
-	Name        string `gorm:"primaryKey"`
-	Type        string
-	Description string
-	Properties  string
-	Options     string
-}
-
-type Gear struct {
 	Name        string `gorm:"primaryKey"`
 	Type        string
 	Description string
@@ -59,14 +38,14 @@ type Spell struct {
 type Character struct {
 	Name           string `gorm:"primaryKey"`
 	Class          string
-	HP             string
-	Proficiency    string
-	Strength       string
-	Dexterity      string
-	Constitution   string
-	Intelligence   string
-	Wisdom         string
-	Charisma       string
+	HP             uint8
+	Proficiency    uint8
+	Strength       uint8
+	Dexterity      uint8
+	Constitution   uint8
+	Intelligence   uint8
+	Wisdom         uint8
+	Charisma       uint8
 	Race           string
 	Feats          string
 	Items          string
@@ -84,7 +63,7 @@ type Character struct {
 
 type Inventory struct {
 	Character string `gorm:"primaryKey"`
-	Items     string
+	Item      string
 }
 
 type Config struct {
