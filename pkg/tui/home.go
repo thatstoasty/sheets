@@ -76,13 +76,16 @@ func (m HomeModel) Update(msg tea.Msg) (HomeModel, tea.Cmd) {
 		// the selected state for the item that the cursor is pointing at.
 		case "enter", " ":
 			switch m.Cursor {
-			// case 0:
-			// 	m.Selected = "Create Character"
-			// 	return m, nil
 			case 0:
-				m.Selected = "Delete Character"
+				m.Selected = "Create Character"
 				return m, nil
 			case 1:
+				m.Selected = "Delete Character"
+				return m, nil
+			case 2:
+				m.Selected = "Update Character"
+				return m, nil
+			case 3:
 				m.Selected = "Start!"
 				return m, startServer()
 			}
