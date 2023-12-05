@@ -10,8 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type CharacterNamesMsg []string
-type CharacterInfoMsg CharacterInfo
+type CharacterMsg Character
 type SwitchUpdateStateMsg State
 
 const (
@@ -39,20 +38,12 @@ func getCharacter(name string) tea.Cmd {
 		if err != nil {
 			log.Fatal("failed to connect database")
 		}
-		character := GetCharacterInfo(db, name)
-		return CharacterInfoMsg(character)
-	}
-}
 
-func getCharacterNames() tea.Msg {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
+		var character Character
+		db.First(&character, "name = ?", name)
 
-	var names []string
-	db.Table("characters").Select("name").Scan(&names)
-	return CharacterNamesMsg(names)
+		return CharacterMsg(character)
+	}
 }
 
 type UpdateCharacterModel struct {
@@ -62,13 +53,13 @@ type UpdateCharacterModel struct {
 	Cursor            int // which list choice our cursor is pointing at
 	CharacterNames    []string
 	SelectedCharacter string
-	Character         CharacterInfo
+	Character         Character
 	AttributeChoices  []string
 	SelectedAttribute string
 }
 
 func (m UpdateCharacterModel) Init() tea.Cmd {
-	return getCharacterNames
+	return nil
 }
 
 func (m UpdateCharacterModel) View() string {
@@ -134,8 +125,8 @@ func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd
 	case selectCharacter:
 
 		switch msg := msg.(type) {
-		case CharacterInfoMsg:
-			m.Character = CharacterInfo(msg)
+		case CharacterMsg:
+			m.Character = Character(msg)
 			m.State = 1
 			return m, nil
 
@@ -199,7 +190,7 @@ func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd
 
 			// The "enter" key and the spacebar (a literal space) toggle
 			// the selected state for the item that the cursor is pointing at.
-			case "enter", " ":
+			case "enter":
 				m.SelectedAttribute = m.AttributeChoices[m.Cursor]
 				m.Cursor = 0
 				m.TextInput.Placeholder = m.SelectedAttribute

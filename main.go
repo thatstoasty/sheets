@@ -2,10 +2,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"log"
+	// "github.com/charmbracelet/lipgloss"
 	"github.com/thatstoasty/character-sheet-ui/pkg/server"
 	"github.com/thatstoasty/character-sheet-ui/pkg/tui"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 	"os"
 )
 
@@ -13,6 +18,17 @@ func setupDB() tea.Msg {
 	server.SetupDB()
 
 	return nil
+}
+
+func getCharacterNames() tea.Msg {
+	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+	if err != nil {
+		log.Fatal("failed to connect database")
+	}
+
+	var names []string
+	db.Table("characters").Select("name").Scan(&names)
+	return CharacterNamesMsg(names)
 }
 
 func BuildTextInput() textinput.Model {
@@ -38,22 +54,45 @@ type Model struct {
 	CreateCharacter tui.CreateCharacterModel
 	DeleteCharacter tui.DeleteCharacterModel
 	UpdateCharacter tui.UpdateCharacterModel
+	CharacterNames  []string
 }
 
+type Item struct {
+	title, desc string
+}
+type CharacterNamesMsg []string
+
+func (i Item) Title() string       { return i.title }
+func (i Item) Description() string { return i.desc }
+func (i Item) FilterValue() string { return i.title }
+
 func initialModel() Model {
+	items := []list.Item{
+		Item{title: "Create Character", desc: "Create your character through interactive prompts!"},
+		Item{title: "Delete Character", desc: "Delete an existing character"},
+		Item{title: "Update Character", desc: "Update an existing character"},
+		Item{title: "Start!", desc: "Starts the web application to generate your interactive character sheet interface!"},
+	}
+
 	return Model{
 		State: showHome,
 		Home: tui.HomeModel{
-			// Our to-do list is a grocery list
-			Choices: []string{"Create Character", "Delete Character", "Update Character", "Start!"},
+			List: list.New(items, list.NewDefaultDelegate(), 0, 0),
 		},
 	}
+	// return Model{
+	// 	State: showHome,
+	// 	Home: tui.HomeModel{
+	// 		// Our to-do list is a grocery list
+	// 		Choices: []string{"Create Character", "Delete Character", "Update Character", "Start!"},
+	// 	},
+	// }
 }
 
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		setupDB,
-		m.UpdateCharacter.Init(),
+		getCharacterNames,
 	)
 }
 
@@ -79,7 +118,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tui.SwitchStateMsg:
 		m.State = tui.State(msg)
 
-	case tui.CharacterNamesMsg:
+	case CharacterNamesMsg:
 		m.UpdateCharacter.AttributeChoices = []string{"Race", "HP", "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma", "Class", "Feats", "Items", "Helmet", "Cloak", "Armor", "Gloves", "Boots", "Jewelery1", "Jewelery2", "Jewelery3", "MainHandWeapon", "OffhandWeapon"}
 		m.UpdateCharacter.CharacterNames = []string(msg)
 		m.DeleteCharacter.CharacterNames = []string(msg)
@@ -97,12 +136,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// If Delete Character is selected (2nd position in the list), then switch to state 2 (delete character menu).
 		case "Delete Character":
 			m.Home.Selected = ""
-			m.State = 2
 			m.DeleteCharacter.Init()
+			m.State = 2
 		case "Update Character":
 			m.Home.Selected = ""
-			m.State = 3
 			m.UpdateCharacter.Init()
+			m.State = 3
 			m.UpdateCharacter.TextInput = BuildTextInput()
 		}
 		return m, cmd

@@ -31,7 +31,7 @@ type DeleteCharacterModel struct {
 }
 
 func (m DeleteCharacterModel) Init() tea.Cmd {
-	return getCharacterNames
+	return nil
 }
 
 func (m DeleteCharacterModel) View() string {

@@ -1,10 +1,13 @@
 package tui
 
 import (
-	"fmt"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/thatstoasty/character-sheet-ui/pkg/server"
 )
+
+var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
 func startServer() tea.Cmd {
 	return func() tea.Msg {
@@ -15,9 +18,8 @@ func startServer() tea.Cmd {
 }
 
 type HomeModel struct {
-	Choices  []string // choices on the list
-	Cursor   int      // which list choice our cursor is pointing at
-	Selected string   // which choice is selected
+	List     list.Model
+	Selected string // which choice is selected
 }
 
 func (m HomeModel) Init() tea.Cmd {
@@ -25,57 +27,26 @@ func (m HomeModel) Init() tea.Cmd {
 }
 
 func (m HomeModel) View() string {
-	// The header
-	s := "What would you like to do?\n\n"
-
-	// Iterate over our choices
-	for i, choice := range m.Choices {
-
-		// Is the cursor pointing at this choice?
-		cursor := " " // no cursor
-		if m.Cursor == i {
-			cursor = ">" // cursor!
-		}
-
-		// Render the row
-		s += fmt.Sprintf("%s %s\n", cursor, choice)
-	}
-
-	// The footer
-	s += "\nPress esc to quit.\n"
-
-	// Send the UI for rendering
-	return s
+	return docStyle.Render(m.List.View())
 }
 
 func (m HomeModel) Update(msg tea.Msg) (HomeModel, tea.Cmd) {
 	switch msg := msg.(type) {
 
+	case tea.WindowSizeMsg:
+		h, v := docStyle.GetFrameSize()
+		m.List.SetSize(msg.Width-h, msg.Height-v)
+
 	// Is it a key press?
 	case tea.KeyMsg:
-		// Cool, what was the actual key pressed?
 		switch msg.String() {
 
-		// These keys should exit the program.
 		case "ctrl+c", "esc":
 			return m, tea.Quit
 
-		// The "up" and "k" keys move the cursor up
-		case "up", "k":
-			if m.Cursor > 0 {
-				m.Cursor--
-			}
-
-		// The "down" and "j" keys move the cursor down
-		case "down", "j":
-			if m.Cursor < len(m.Choices)-1 {
-				m.Cursor++
-			}
-
-		// The "enter" key and the spacebar (a literal space) toggle
 		// the selected state for the item that the cursor is pointing at.
-		case "enter", " ":
-			switch m.Cursor {
+		case "enter":
+			switch m.List.Cursor() {
 			case 0:
 				m.Selected = "Create Character"
 				return m, nil
@@ -94,5 +65,7 @@ func (m HomeModel) Update(msg tea.Msg) (HomeModel, tea.Cmd) {
 
 	// Return the updated model to the Bubble Tea runtime for processing.
 	// Note that we're not returning a command.
-	return m, nil
+	var cmd tea.Cmd
+	m.List, cmd = m.List.Update(msg)
+	return m, cmd
 }
