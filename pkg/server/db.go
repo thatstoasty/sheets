@@ -38,15 +38,22 @@ func SetupDB() {
 	// Migrate the schema
 	db.AutoMigrate(&ClassFeature{})
 	db.AutoMigrate(&Characteristic{})
+	db.AutoMigrate(&FeatureChoices{})
 	db.AutoMigrate(&Item{})
 	db.AutoMigrate(&Spell{})
 	db.AutoMigrate(&Option{})
 	db.AutoMigrate(&Character{})
+	db.AutoMigrate(&Race{})
 
 	// Create Races
 	races := readCSVData("data/players_handbook/races.csv")
 	for _, race := range races {
 		db.Save(&Characteristic{Name: race[0], Options: race[1]})
+	}
+
+	// Create Races
+	for _, race := range races {
+		db.Save(&Race{Name: race[0]})
 	}
 
 	// Create Feats
@@ -135,7 +142,7 @@ func SetupDB() {
 				if err != nil {
 					panic(err)
 				}
-				db.Save(&ClassFeature{Name: classFeature[0], Class: classFeature[1], Type: classFeature[2], SubClass: classFeature[3], Level: uint32(level), Options: classFeature[5]})
+				db.Save(&ClassFeature{Name: classFeature[0], Type: classFeature[1], Class: classFeature[2], SubClass: classFeature[3], Level: uint32(level), Options: classFeature[5]})
 			}
 		}
 

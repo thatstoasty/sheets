@@ -2,14 +2,57 @@ package tui
 
 import (
 	"fmt"
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"io"
 	"log"
+	"strings"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
+const listHeight = 14
+
+var (
+	titleStyle        = lipgloss.NewStyle().MarginLeft(2)
+	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
+	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
+	paginationStyle   = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
+	helpStyle         = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
+	quitTextStyle     = lipgloss.NewStyle().Margin(1, 0, 2, 4)
+)
+
+type item string
+
+func (i item) FilterValue() string { return "" }
+
+type itemDelegate struct{}
+
+func (d itemDelegate) Height() int                             { return 1 }
+func (d itemDelegate) Spacing() int                            { return 0 }
+func (d itemDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd { return nil }
+func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
+	i, ok := listItem.(item)
+	if !ok {
+		return
+	}
+
+	str := fmt.Sprintf("%d. %s", index+1, i)
+
+	fn := itemStyle.Render
+	if index == m.Index() {
+		fn = func(s ...string) string {
+			return selectedItemStyle.Render("> " + strings.Join(s, " "))
+		}
+	}
+
+	fmt.Fprint(w, fn(str))
+}
+
 type RefreshMsg bool
+type ListMsg list.Model
 
 func deleteCharacter(name string) tea.Cmd {
 	return func() tea.Msg {
@@ -20,80 +63,72 @@ func deleteCharacter(name string) tea.Cmd {
 
 		db.Where("name = ?", name).Delete(&Character{})
 
-		return RefreshMsg(true)
+		return SwitchStateMsg(showHome)
+	}
+}
+
+func setupInitialModel(title string, characterNames []string) tea.Cmd {
+	return func() tea.Msg {
+		items := []list.Item{}
+
+		const defaultWidth = 80
+
+		l := list.New(items, itemDelegate{}, defaultWidth, listHeight)
+		l.Title = title
+		l.SetShowStatusBar(false)
+		l.SetFilteringEnabled(false)
+		l.Styles.Title = titleStyle
+		l.Styles.PaginationStyle = paginationStyle
+		l.Styles.HelpStyle = helpStyle
+
+		for index, choice := range characterNames {
+			l.InsertItem(index, item(choice))
+		}
+
+		return ListMsg(l)
 	}
 }
 
 type DeleteCharacterModel struct {
-	Cursor            int // which list choice our cursor is pointing at
-	CharacterNames    []string
-	SelectedCharacter string
+	List           list.Model
+	CharacterNames []string
+	Selected       string
 }
 
 func (m DeleteCharacterModel) Init() tea.Cmd {
-	return nil
-}
+	return tea.Sequence(
+		getCharacterNames,
+		setupInitialModel("Which character do you want to delete?", m.CharacterNames),
+	)
 
-func (m DeleteCharacterModel) View() string {
-	// The header
-	s := "Which character would you like to delete?\n\n"
-
-	// Iterate over our choices
-	for i, choice := range m.CharacterNames {
-
-		// Is the cursor pointing at this choice?
-		cursor := " " // no cursor
-		if m.Cursor == i {
-			cursor = ">" // cursor!
-		}
-
-		// Render the row
-		s += fmt.Sprintf("%s %s\n", cursor, choice)
-	}
-
-	// The footer
-	s += "\nPress esc to quit.\n"
-
-	// Send the UI for rendering
-	return s
 }
 
 func (m DeleteCharacterModel) Update(msg tea.Msg) (DeleteCharacterModel, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.List.SetWidth(msg.Width)
+		return m, nil
 
-	case RefreshMsg:
-		return m, m.Init()
-
-	// Is it a key press?
 	case tea.KeyMsg:
-		// Cool, what was the actual key pressed?
-		switch msg.String() {
-
-		// These keys should exit the program.
-		case "ctrl+c", "esc":
+		switch keypress := msg.String(); keypress {
+		case "ctrl+c":
 			return m, tea.Quit
 
-		// The "up" and "k" keys move the cursor up
-		case "up", "k":
-			if m.Cursor > 0 {
-				m.Cursor--
+		case "enter":
+			i, ok := m.List.SelectedItem().(item)
+			if ok {
+				m.Selected = string(i)
 			}
 
-		// The "down" and "j" keys move the cursor down
-		case "down", "j":
-			if m.Cursor < len(m.CharacterNames)-1 {
-				m.Cursor++
-			}
-
-		// The "enter" key and the spacebar (a literal space) toggle
-		// the selected state for the item that the cursor is pointing at.
-		case "enter", " ":
-			m.SelectedCharacter = m.CharacterNames[m.Cursor]
-			fmt.Println(m.SelectedCharacter)
-			m.Cursor = 0
-			return m, deleteCharacter(m.SelectedCharacter)
+			return m, deleteCharacter(m.Selected)
 		}
 	}
 
-	return m, nil
+	var cmd tea.Cmd
+	m.List, cmd = m.List.Update(msg)
+	return m, cmd
+}
+
+func (m DeleteCharacterModel) View() string {
+	return m.List.View()
 }

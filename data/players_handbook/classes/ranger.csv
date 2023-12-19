@@ -1,17 +1,13 @@
-Favored Enemy,NoChoice,Ranger,Base,1,Favored Enemy
-Favored Foe,NoChoice,Ranger,Base,1,Favored Foe
-Natural Explorer,NoChoice,Ranger,Base,2,Natural Explorer
-Deft Explorer,NoChoice,Ranger,Base,2,Deft Explorer
-Primeval Awareness,NoChoice,Ranger,Base,3,Primeval Awareness
-Primal Awareness,NoChoice,Ranger,Base,3,Primal Awareness
+Favored Opponent,Choice,Ranger,Base,1,Favored Enemy|Favored Foe
+Explorer,Choice,Ranger,Base,2,Natural Explorer|Deft Explorer
+Awareness,Choice,Ranger,Base,3,Primeval Awareness|Primal Awareness
 Hunter's Prey,NoChoice,Ranger,Hunter,3,Hunter's Prey
-Ranger's Companion,NoChoice,Ranger,Beast Master,3,Ranger's Companion
-Primal Companion,NoChoice,Ranger,Beast Master,3,Primal Companion
+Companion,NoChoice,Ranger,Beast Master,3,Ranger's Companion|Primal Companion
 Extra Attack,NoChoice,Ranger,Base,5,Extra Attack
 Defensive Tactics,NoChoice,Ranger,Hunter,7,Defensive Tactics
 Exceptional Training,NoChoice,Ranger,Beast Master,7,Exceptional Training
 Land's Stride,NoChoice,Ranger,Base,8,Land's Stride
-Hide in Plain Sight,NoChoice,Ranger,Base,10,Hide in Plain Sight
+Hiding,Choice,Ranger,Base,10,Hide in Plain Sight|Nature's Veil
 Multiattack,NoChoice,Ranger,Hunter,11,Multiattack
 Bestial Fury,NoChoice,Ranger,Beast Master,11,Bestial Fury
 Vanish,NoChoice,Ranger,Base,10,Vanish

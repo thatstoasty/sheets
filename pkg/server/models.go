@@ -67,10 +67,20 @@ type Inventory struct {
 	Item      string
 }
 
+type FeatureChoices struct {
+	Character string `gorm:"primaryKey"`
+	Feature   string `gorm:"primaryKey"`
+	Choice    string
+}
+
 type Config struct {
 	Name  string
 	Class string
 	Race  string
 	Feats string
 	Items string
+}
+
+type Race struct {
+	Name string `gorm:"primaryKey"`
 }

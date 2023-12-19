@@ -253,6 +253,6 @@ func SubmitCharacter(hero Character) tea.Cmd {
 			OffHandWeapon:  hero.OffHandWeapon,
 		})
 
-		return SwitchStateMsg(0)
+		return SwitchStateMsg(showHome)
 	}
 }
