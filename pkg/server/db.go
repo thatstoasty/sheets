@@ -40,6 +40,7 @@ func SetupDB() {
 	db.AutoMigrate(&Characteristic{})
 	db.AutoMigrate(&FeatureChoices{})
 	db.AutoMigrate(&Item{})
+	db.AutoMigrate(&Weapon{})
 	db.AutoMigrate(&Spell{})
 	db.AutoMigrate(&Option{})
 	db.AutoMigrate(&Character{})
@@ -65,7 +66,7 @@ func SetupDB() {
 	// Create Items
 	items := readCSVData("data/players_handbook/items.csv")
 	for _, item := range items {
-		db.Save(&Item{Name: item[0], Type: item[1], Description: item[2], Properties: item[3], Options: item[4]})
+		db.Save(&Item{Name: item[0], Category: "Item", Type: item[1], Description: item[2], Properties: item[3], Options: item[4]})
 	}
 
 	// Create Weapons
@@ -77,7 +78,7 @@ func SetupDB() {
 		if !file.IsDir() {
 			weapons := readCSVData(path)
 			for _, weapon := range weapons {
-				db.Save(&Item{Name: weapon[0], Type: weapon[1], Description: weapon[2], Properties: weapon[3], Options: weapon[4]})
+				db.Save(&Item{Name: weapon[0], Category: "Weapon", Type: weapon[1], Description: weapon[2], Properties: weapon[3], Options: weapon[4]})
 			}
 		}
 
@@ -87,7 +88,7 @@ func SetupDB() {
 	// Create Armor
 	armors := readCSVData("data/players_handbook/armor.csv")
 	for _, armor := range armors {
-		db.Save(&Item{Name: armor[0], Type: armor[1], Description: armor[2], Properties: armor[3], Options: armor[4]})
+		db.Save(&Item{Name: armor[0], Category: "Armor", Type: armor[1], Description: armor[2], Properties: armor[3], Options: armor[4]})
 	}
 
 	// Create Options

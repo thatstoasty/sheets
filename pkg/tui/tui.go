@@ -27,7 +27,14 @@ func switchState(state State) tea.Cmd {
 	}
 }
 
+func switchParentState(state State) tea.Cmd {
+	return func() tea.Msg {
+		return SwitchParentStateMsg(state)
+	}
+}
+
 type SwitchStateMsg State
+type SwitchParentStateMsg State
 
 // Define what menu is being shown by using an state constants
 type State int
@@ -39,8 +46,6 @@ func setupDB() tea.Msg {
 }
 
 func getCharacterNames() tea.Msg {
-	fmt.Println("getting character names")
-
 	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect database")
@@ -103,8 +108,9 @@ func initialModel() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return tea.Batch(
+	return tea.Sequence(
 		setupDB,
+		getCharacterNames,
 	)
 }
 
@@ -125,6 +131,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch keypress := msg.String(); keypress {
+
+		// These keys should exit the program.
+		case "ctrl+c", "esc":
+			return m, tea.Quit
+		}
+
+	case SwitchParentStateMsg:
+		m.State = State(msg)
+	}
+
 	switch m.State {
 	case showHome:
 		// Add the list component update message to the list of commands
@@ -132,30 +151,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 
 		switch msg := msg.(type) {
-		case SetupTextInputMsg:
-			switch msg.ModelName {
-			case "CreateCharacter":
-				m.CreateCharacter.TextInput = msg.TextInput
-			case "UpdateCharacter":
-				m.UpdateCharacter.TextInput = msg.TextInput
-			}
-
-		case CreateListMsg:
-			m.CreateCharacter.List = list.Model(msg)
-
-		case ListMsg:
-			m.DeleteCharacter.List = list.Model(msg)
-
-		case RacesMsg:
-			m.CreateCharacter.Races = []string(msg)
-
 		case SwitchStateMsg:
 			m.State = State(msg)
 
-		case CharacterNamesMsg:
-			m.UpdateCharacter.AttributeChoices = []string{"Race", "HP", "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma", "Class", "Feats", "Items", "Helmet", "Cloak", "Armor", "Gloves", "Boots", "Jewelery1", "Jewelery2", "Jewelery3", "MainHandWeapon", "OffhandWeapon"}
-			m.UpdateCharacter.CharacterNames = []string(msg)
-			m.DeleteCharacter.CharacterNames = []string(msg)
+		case SwitchParentStateMsg:
+			m.State = State(msg)
 
 		case tea.WindowSizeMsg:
 			h, v := docStyle.GetFrameSize()
@@ -172,14 +172,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 				switch m.List.Cursor() {
 				case 0:
-					cmds = append(cmds, m.CreateCharacter.Init(), switchState(showCreateCharacter))
-					return m, tea.Sequence(cmds...)
+					return m, tea.Sequence(switchState(showCreateCharacter), m.CreateCharacter.Init())
 				case 1:
-					cmds = append(cmds, m.DeleteCharacter.Init(), switchState(showDeleteCharacter))
-					return m, tea.Sequence(cmds...)
+					return m, tea.Sequence(switchState(showDeleteCharacter), m.DeleteCharacter.Init())
 				case 2:
-					cmds = append(cmds, m.UpdateCharacter.Init(), switchState(showUpdateCharacter))
-					return m, tea.Sequence(cmds...)
+					return m, tea.Sequence(switchState(showUpdateCharacter), m.UpdateCharacter.Init())
 				case 3:
 					return m, startServer()
 				}

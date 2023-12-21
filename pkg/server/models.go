@@ -23,6 +23,15 @@ type Characteristic struct {
 
 type Item struct {
 	Name        string `gorm:"primaryKey"`
+	Category    string
+	Type        string
+	Description string
+	Properties  string
+	Options     string
+}
+
+type Weapon struct {
+	Name        string `gorm:"primaryKey"`
 	Type        string
 	Description string
 	Properties  string

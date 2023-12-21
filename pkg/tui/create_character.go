@@ -9,6 +9,8 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.org/x/exp/slices"
+
 	// "log"
 	"github.com/thatstoasty/character-sheet-ui/pkg/server"
 	"gorm.io/driver/sqlite"
@@ -70,7 +72,12 @@ func getChoices(class string) tea.Cmd {
 	}
 }
 
-type RacesMsg []string
+type TableData struct {
+	Category string
+	Records  []string
+}
+
+type TableDataMsg TableData
 
 func getRaces() tea.Msg {
 	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
@@ -80,7 +87,42 @@ func getRaces() tea.Msg {
 
 	var races []string
 	db.Table("races").Select("name").Scan(&races)
-	return RacesMsg(races)
+	return TableDataMsg(TableData{"Race", races})
+}
+
+func getWeapons() tea.Msg {
+	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+	if err != nil {
+		log.Fatal("failed to connect database")
+	}
+
+	var weapons []string
+	db.Table("items").Select("name").Where("category = 'Weapon'").Scan(&weapons)
+	return TableDataMsg(TableData{"Weapon", weapons})
+}
+
+func getLightWeapons() tea.Msg {
+	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+	if err != nil {
+		log.Fatal("failed to connect database")
+	}
+
+	var weapons []string
+	db.Table("items").Select("name").Where("category = 'Weapon' and properties like '%Light%'").Scan(&weapons)
+	return TableDataMsg(TableData{"LightWeapon", weapons})
+}
+
+func getGear(category string) tea.Cmd {
+	return func() tea.Msg {
+		db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+		if err != nil {
+			log.Fatal("failed to connect database")
+		}
+
+		var weapons []string
+		db.Table("items").Select("name").Where("type = ?", category).Scan(&weapons)
+		return TableDataMsg(TableData{category, weapons})
+	}
 }
 
 type SubmitCharacterMsg bool
@@ -129,6 +171,7 @@ const (
 	promptMainHandWeapon
 	promptOffhandWeapon
 	promptSelection
+	characterCreated
 )
 
 type CreateCharacterModel struct {
@@ -143,6 +186,14 @@ type CreateCharacterModel struct {
 	ActiveChoices []string
 	Selections    []FeatureWithChoices
 	Races         []string
+	Weapons       []string
+	LightWeapons  []string
+	Armor         []string
+	Cloaks        []string
+	Helmets       []string
+	Boots         []string
+	Gloves        []string
+	Jewelery      []string
 }
 
 type CreateListMsg list.Model
@@ -176,152 +227,106 @@ func submitCharacter(hero Character) tea.Cmd {
 	}
 }
 
-type SetupTextInputMsg struct {
-	TextInput textinput.Model
-	ModelName string
-}
+type TextInputMsg textinput.Model
 
-func setupTextInput(modelName string) tea.Cmd {
-	return func() tea.Msg {
-		return SetupTextInputMsg{BuildTextInput(), modelName}
-	}
+func setupTextInput() tea.Msg {
+	return TextInputMsg(BuildTextInput())
 }
 
 func (m CreateCharacterModel) Init() tea.Cmd {
 	return tea.Batch(
 		getRaces,
-		getCharacterNames,
-		setupTextInput("CreateCharacter"),
+		setupTextInput,
 	)
 
 }
 
 func (m CreateCharacterModel) View() string {
-	switch m.State {
-	case promptName:
-		return fmt.Sprintf(
-			"Enter the name of the character:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptClass:
-		return fmt.Sprintf(
-			"Enter the classes of the character (| and , delimited like this Paladin|10|Oath of Ancients,Monk|10|Way of the Shadow):\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptRace:
+	if slices.Contains([]State{promptName, promptClass, promptStats, promptFeats, promptItems, promptItems, characterCreated}, m.State) {
+		switch m.State {
+		case promptName:
+			return fmt.Sprintf(
+				"Enter the name of the character:\n\n%s\n\n%s",
+				m.TextInput.View(),
+				"(esc to quit)",
+			) + "\n"
+		case promptClass:
+			return fmt.Sprintf(
+				"Enter the classes of the character (| and , delimited like this Paladin|10|Oath of Ancients,Monk|10|Way of the Shadow):\n\n%s\n\n%s",
+				m.TextInput.View(),
+				"(esc to quit)",
+			) + "\n"
+		case promptRace:
+			return m.List.View()
+		case promptStats:
+			return fmt.Sprintf(
+				"Enter the stats of the character separated by commas (HP, Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma):\n\n%s\n\n%s",
+				m.TextInput.View(),
+				"(esc to quit)",
+			) + "\n"
+		case promptFeats:
+			return fmt.Sprintf(
+				"Enter the feats your character has separated by commas:\n\n%s\n\n%s",
+				m.TextInput.View(),
+				"(esc to quit)",
+			) + "\n"
+		case promptItems:
+			return fmt.Sprintf(
+				"Enter the items your character has separated by commas:\n\n%s\n\n%s",
+				m.TextInput.View(),
+				"(esc to quit)",
+			) + "\n"
+		case characterCreated:
+			return fmt.Sprintf(
+				"%s has been created!\n\n%s\n\n%s",
+				m.Character.Name,
+				"(tab to return home)",
+				"(esc to quit)",
+			) + "\n"
+		}
+	} else {
 		return m.List.View()
-	case promptStats:
-		return fmt.Sprintf(
-			"Enter the stats of the character separated by commas (HP, Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma):\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptFeats:
-		return fmt.Sprintf(
-			"Enter the feats your character has separated by commas:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptItems:
-		return fmt.Sprintf(
-			"Enter the items your character has separated by commas:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptHelmet:
-		return fmt.Sprintf(
-			"What helmet does your character have equipped? Leave blank if none:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptCloak:
-		return fmt.Sprintf(
-			"What cloak does your character have equipped? Leave blank if none:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptArmor:
-		return fmt.Sprintf(
-			"What armor does your character have equipped? Leave blank if none:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptJewelery1:
-		return fmt.Sprintf(
-			"What is the first piece of jewelery your character has equipped? Leave blank if none:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptJewelery2:
-		return fmt.Sprintf(
-			"What is the second piece of jewelery your character has equipped? Leave blank if none:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptJewelery3:
-		return fmt.Sprintf(
-			"What is the third piece of jewelery your character has equipped? Leave blank if none:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptBoots:
-		return fmt.Sprintf(
-			"What boots does your character have equipped? Leave blank if none:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptGloves:
-		return fmt.Sprintf(
-			"What gloves does your character have equipped? Leave blank if none:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptMainHandWeapon:
-		return fmt.Sprintf(
-			"What main hand or two handed weapon does your character have equipped? Leave blank if none:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptOffhandWeapon:
-		return fmt.Sprintf(
-			"What off hand weapon does your character have equipped? Leave blank if none:\n\n%s\n\n%s",
-			m.TextInput.View(),
-			"(esc to quit)",
-		) + "\n"
-	case promptSelection:
-		return "\n" + m.List.View()
-	default:
-		return "Unrecoverable state!"
 	}
 
+	return "Oops!"
 }
 
 func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch keypress := msg.String(); keypress {
-
-		case "/":
-			fmt.Println(m.Character)
-			fmt.Println(m.Choices)
-			fmt.Println(m.State)
-			fmt.Println(m.Races)
-			fmt.Println(m.TextInput)
-
-		// These keys should exit the program.
-		case "ctrl+c", "esc":
-			return m, tea.Quit
-		}
-
-	case RacesMsg:
-		m.Races = []string(msg)
-
 	case CreateListMsg:
 		m.List = list.Model(msg)
+
+	case TextInputMsg:
+		m.TextInput = textinput.Model(msg)
+
+	case SwitchStateMsg:
+		m.TextInput.Reset()
+		m.State = State(msg)
+
+	case TableDataMsg:
+		tableData := TableData(msg)
+		switch tableData.Category {
+		case "Weapon":
+			m.Weapons = tableData.Records
+		case "LightWeapon":
+			m.LightWeapons = tableData.Records
+		case "Armor":
+			m.Armor = tableData.Records
+		case "Helmet":
+			m.Helmets = tableData.Records
+		case "Cloak":
+			m.Cloaks = tableData.Records
+		case "Boots":
+			m.Boots = tableData.Records
+		case "Gloves":
+			m.Gloves = tableData.Records
+		case "Jewelery":
+			m.Jewelery = tableData.Records
+		case "Race":
+			m.Races = tableData.Records
+		}
 	}
 
 	switch m.State {
@@ -331,9 +336,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				m.Character.Name = m.TextInput.Value()
-				m.TextInput.Reset()
-				m.State++
-				return m, setupInitialCreateList("Choose your race", &m.Races)
+				return m, tea.Sequence(setupInitialCreateList("Choose your race", &m.Races), switchState(promptRace))
 			}
 		}
 	case promptRace:
@@ -346,7 +349,17 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 					m.Character.Race = string(i)
 				}
 
-				m.State++
+				return m, tea.Batch(
+					getGear("Cloak"),
+					getGear("Helmet"),
+					getGear("Armor"),
+					getGear("Jewelery"),
+					getGear("Boots"),
+					getGear("Gloves"),
+					getWeapons,
+					getLightWeapons,
+					switchState(promptClass),
+				)
 			}
 		}
 	case promptClass:
@@ -355,8 +368,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				m.Character.Class = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				return m, switchState(promptStats)
 			}
 		}
 	case promptStats:
@@ -407,8 +419,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				m.Character.Intelligence = uint8(intelligence)
 				m.Character.Wisdom = uint8(wisdom)
 				m.Character.Charisma = uint8(charisma)
-				m.State++
-				m.TextInput.Reset()
+				return m, switchState(promptFeats)
 			}
 		}
 	case promptFeats:
@@ -417,8 +428,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				m.Character.Feats = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				return m, switchState(promptItems)
 			}
 		}
 	case promptItems:
@@ -427,8 +437,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				m.Character.Items = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				return m, tea.Sequence(setupInitialCreateList("What helmet does your character have equipped?", &m.Helmets), switchState(promptHelmet))
 			}
 		}
 	case promptHelmet:
@@ -437,8 +446,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				m.Character.Helmet = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				return m, tea.Sequence(setupInitialCreateList("What cloak does your character have equipped?", &m.Cloaks), switchState(promptCloak))
 			}
 		}
 	case promptCloak:
@@ -446,9 +454,11 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.Cloak = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Character.Cloak = string(i)
+				}
+				return m, tea.Sequence(setupInitialCreateList("What armor does your character have equipped?", &m.Armor), switchState(promptArmor))
 			}
 		}
 	case promptArmor:
@@ -456,9 +466,11 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.Armor = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Character.Armor = string(i)
+				}
+				return m, tea.Sequence(setupInitialCreateList("What's the first piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery1))
 			}
 		}
 	case promptJewelery1:
@@ -466,9 +478,11 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.Jewelery1 = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Character.Jewelery1 = string(i)
+				}
+				return m, tea.Sequence(setupInitialCreateList("What's the second piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery2))
 			}
 		}
 	case promptJewelery2:
@@ -476,9 +490,11 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.Jewelery2 = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Character.Jewelery2 = string(i)
+				}
+				return m, tea.Sequence(setupInitialCreateList("What's the third piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery3))
 			}
 		}
 	case promptJewelery3:
@@ -486,9 +502,11 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.Jewelery3 = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Character.Jewelery3 = string(i)
+				}
+				return m, tea.Sequence(setupInitialCreateList("What boots does your character have equipped?", &m.Boots), switchState(promptBoots))
 			}
 		}
 	case promptBoots:
@@ -496,9 +514,11 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.Boots = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Character.Boots = string(i)
+				}
+				return m, tea.Sequence(setupInitialCreateList("What gloves does your character have equipped?", &m.Gloves), switchState(promptGloves))
 			}
 		}
 	case promptGloves:
@@ -506,9 +526,11 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.Gloves = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Character.Gloves = string(i)
+				}
+				return m, tea.Sequence(setupInitialCreateList("What main hand weapon does your character have equipped?", &m.Weapons), switchState(promptMainHandWeapon))
 			}
 		}
 	case promptMainHandWeapon:
@@ -516,9 +538,11 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.MainHandWeapon = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Character.MainHandWeapon = string(i)
+				}
+				return m, tea.Sequence(setupInitialCreateList("What off hand weapon does your character have equipped?", &m.LightWeapons), switchState(promptOffhandWeapon))
 			}
 		}
 	case promptOffhandWeapon:
@@ -526,16 +550,12 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.OffHandWeapon = m.TextInput.Value()
-				m.State++
-				m.TextInput.Reset()
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Character.OffHandWeapon = string(i)
+				}
+				return m, getChoices(m.Character.Class)
 			}
-		}
-		return m, getChoices(m.Character.Class)
-	case promptSelection:
-		switch msg := msg.(type) {
-		case SubmitCharacterMsg:
-			return m, SubmitCharacter(m.Character)
 
 		case ChoicesMsg:
 			m.Choices = []FeatureWithChoices(msg)
@@ -547,8 +567,15 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				}
 			}
 
-			return m, nil
-
+			// If there's no choices to make then submit the character, otherwise proceed to feature selection.
+			if len(m.Choices) <= m.ChoiceIndex {
+				return m, tea.Sequence(submitCharacter(m.Character), switchState(promptSelection))
+			} else {
+				return m, tea.Sequence(setupInitialCreateList("Choose the feature you'd like!", &m.ActiveChoices), switchState(promptSelection))
+			}
+		}
+	case promptSelection:
+		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
@@ -560,7 +587,13 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 
 					// If we've reached the end of the choices array then submit the selections
 					if len(m.Choices) <= m.ChoiceIndex {
-						return m, submitChoices(m.Character.Name, m.Selections)
+						return m, tea.Sequence(
+							tea.Batch(
+								submitChoices(m.Character.Name, m.Selections),
+								SubmitCharacter(m.Character),
+							),
+							switchState(characterCreated),
+						)
 					}
 
 					// Otherwise update the feature and choices being decided on
@@ -579,20 +612,24 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				return m, nil
 			}
 		}
+	case characterCreated:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch keypress := msg.String(); keypress {
+			case "tab":
+				m.ChoiceIndex = 0
+				return m, tea.Sequence(switchState(promptName), switchParentState(showHome))
+			case "esc":
+				return m, tea.Quit
+			}
+		}
 	}
 
-	// if m.State == promptSelection {
-	// 	m.List, cmd = m.List.Update(msg)
-	// } else {
-	// 	// TextInput component Update -> CreateCharacter component Update -> Parent Update. Bubbles up
-	// 	m.TextInput, cmd = m.TextInput.Update(msg)
-	// }
-	if m.State == promptRace {
-		m.List, cmd = m.List.Update(msg)
-	} else {
+	if slices.Contains([]State{promptName, promptClass, promptStats, promptItems, promptItems}, m.State) {
 		m.TextInput, cmd = m.TextInput.Update(msg)
+	} else {
+		m.List, cmd = m.List.Update(msg)
 	}
-	// cmds = append(cmds, cmd)
-	// return m, tea.Batch(cmds...)
+
 	return m, cmd
 }

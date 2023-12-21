@@ -63,11 +63,11 @@ func deleteCharacter(name string) tea.Cmd {
 
 		db.Where("name = ?", name).Delete(&Character{})
 
-		return SwitchStateMsg(showHome)
+		return RefreshMsg(true)
 	}
 }
 
-func setupInitialModel(title string, characterNames []string) tea.Cmd {
+func setupInitialModel(title string, characterNames *[]string) tea.Cmd {
 	return func() tea.Msg {
 		items := []list.Item{}
 
@@ -81,7 +81,7 @@ func setupInitialModel(title string, characterNames []string) tea.Cmd {
 		l.Styles.PaginationStyle = paginationStyle
 		l.Styles.HelpStyle = helpStyle
 
-		for index, choice := range characterNames {
+		for index, choice := range *characterNames {
 			l.InsertItem(index, item(choice))
 		}
 
@@ -90,21 +90,27 @@ func setupInitialModel(title string, characterNames []string) tea.Cmd {
 }
 
 type DeleteCharacterModel struct {
-	List           list.Model
-	CharacterNames []string
-	Selected       string
+	Initalizing bool
+	List        list.Model
 }
 
 func (m DeleteCharacterModel) Init() tea.Cmd {
-	return tea.Sequence(
-		getCharacterNames,
-		setupInitialModel("Which character do you want to delete?", m.CharacterNames),
-	)
-
+	return getCharacterNames
 }
 
 func (m DeleteCharacterModel) Update(msg tea.Msg) (DeleteCharacterModel, tea.Cmd) {
 	switch msg := msg.(type) {
+	case ListMsg:
+		m.List = list.Model(msg)
+		m.Initalizing = false
+
+	case RefreshMsg:
+		return m, getCharacterNames
+
+	case CharacterNamesMsg:
+		names := []string(msg)
+		return m, setupInitialModel("Which character do you want to delete?", &names)
+
 	case tea.WindowSizeMsg:
 		m.List.SetWidth(msg.Width)
 		return m, nil
@@ -115,12 +121,16 @@ func (m DeleteCharacterModel) Update(msg tea.Msg) (DeleteCharacterModel, tea.Cmd
 			return m, tea.Quit
 
 		case "enter":
+			var cmd tea.Cmd
 			i, ok := m.List.SelectedItem().(item)
 			if ok {
-				m.Selected = string(i)
+				cmd = deleteCharacter(string(i))
 			}
 
-			return m, deleteCharacter(m.Selected)
+			return m, cmd
+
+		case "tab":
+			return m, switchParentState(showHome)
 		}
 	}
 
@@ -130,5 +140,12 @@ func (m DeleteCharacterModel) Update(msg tea.Msg) (DeleteCharacterModel, tea.Cmd
 }
 
 func (m DeleteCharacterModel) View() string {
-	return m.List.View()
+	if m.Initalizing {
+		return "Loading..."
+	} else {
+		return fmt.Sprintf("%s\n\n%s\n",
+			m.List.View(),
+			"(esc to quit, tab to return home)",
+		)
+	}
 }
