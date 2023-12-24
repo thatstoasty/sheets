@@ -11,9 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type CharacterMsg Character
-type SwitchUpdateStateMsg State
-
 const (
 	selectCharacter State = iota
 	selectAttribute
@@ -33,20 +30,6 @@ func updateCharacterAttribute(name string, attribute string, value string) tea.C
 	}
 }
 
-func getCharacter(name string) tea.Cmd {
-	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-		if err != nil {
-			log.Fatal("failed to connect database")
-		}
-
-		var character Character
-		db.First(&character, "name = ?", name)
-
-		return CharacterMsg(character)
-	}
-}
-
 type UpdateCharacterModel struct {
 	State             State
 	TextInput         textinput.Model
@@ -60,27 +43,21 @@ func (m UpdateCharacterModel) Init() tea.Cmd {
 }
 
 func (m UpdateCharacterModel) View() string {
-	switch m.State {
-	case selectCharacter:
-		return fmt.Sprintf("%s\n\n%s\n",
+	var prompt string
+	if m.State != updatePrompt {
+		prompt = fmt.Sprintf("%s\n\n%s\n",
 			m.List.View(),
 			"(esc to quit, tab to return home)",
 		)
-	case selectAttribute:
-		return fmt.Sprintf("%s\n\n%s\n",
-			m.List.View(),
-			"(esc to quit, tab to return home)",
-		)
-	case updatePrompt:
-		return fmt.Sprintf(
-			"What would you like to update your %s to?\n\n%s\n\n%s",
+	} else {
+		prompt = fmt.Sprintf("What would you like to update your %s to?\n\n%s\n\n%s",
 			m.SelectedAttribute,
 			m.TextInput.View(),
 			"(esc to quit, tab to return home)",
-		) + "\n"
+		)
 	}
 
-	return "Oops!"
+	return centeredStyle.Render(prompt)
 }
 
 func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd) {
@@ -106,12 +83,12 @@ func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd
 	switch m.State {
 	case selectCharacter:
 		switch msg := msg.(type) {
-		case SwitchUpdateStateMsg:
+		case SwitchStateMsg:
 			m.State = State(msg)
 
 		case CharacterNamesMsg:
 			names := []string(msg)
-			return m, setupInitialModel("Which character do you want to update?", &names)
+			return m, setupList("Which character do you want to update?", &names)
 
 		case ListMsg:
 			m.List = list.Model(msg)
@@ -129,7 +106,7 @@ func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd
 				}
 
 				choices := []string{"Race", "HP", "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma", "Class", "Feats", "Items", "Helmet", "Cloak", "Armor", "Gloves", "Boots", "Jewelery1", "Jewelery2", "Jewelery3", "MainHandWeapon", "OffhandWeapon"}
-				return m, tea.Sequence(setupInitialModel("What would you like to update?", &choices), switchState(selectAttribute))
+				return m, tea.Sequence(setupList("What would you like to update?", &choices), switchState(selectAttribute))
 			}
 		}
 
@@ -149,17 +126,12 @@ func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd
 
 	case updatePrompt:
 		switch msg := msg.(type) {
-		// Is it a key press?
 		case tea.KeyMsg:
-			// Cool, what was the actual key pressed?
 			switch msg.String() {
 
-			// These keys should exit the program.
 			case "ctrl+c", "esc":
 				return m, tea.Quit
 
-			// The "enter" key and the spacebar (a literal space) toggle
-			// the selected state for the item that the cursor is pointing at.
 			case "enter":
 				m.TextInput.Placeholder = ""
 				return m, updateCharacterAttribute(m.SelectedCharacter, m.SelectedAttribute, m.TextInput.Value())

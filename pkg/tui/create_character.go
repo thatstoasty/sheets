@@ -11,41 +11,96 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.org/x/exp/slices"
 
-	// "log"
 	"github.com/thatstoasty/character-sheet-ui/pkg/server"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-// Name            = "Mikhail"
-// Race            = "Dwarf"
-// HP	  			= 30
-// Strength 		= 16
-// Dexterity 		= 10
-// Constitution     = 14
-// Intelligence 	= 8
-// Wisdom 			= 8
-// Charisma 		= 17
-// Feats           = "War Caster,Polearm Master,Tavern Brawler,Tough,Spell Sniper,Great Weapon Master,Sharpshooter"
-// Items           = "Potion of Healing,Shortbow"
-// Class           = "Paladin|10|Oath of Ancients,Monk|10|Way of the Shadow"
-// Helmet          = "Leather Helmet"
-// Cloak           = "Leather Cloak"
-// Armor           = "Scale Mail"
-// Jewelery1       = "Bronze Ring"
-// Jewelery2       = "Bronze Ring"
-// Jewelery3       = "Bronze Ring"
-// Boots           = "Leather Boots"
-// Gloves          = "Leather Gloves"
-// MainHandWeapon  = "Rapier"
-// OffHandWeapon   = ""
+func setStats(input string, character *Character) {
+	stats := strings.Split(input, ",")
+	hp, err := strconv.Atoi(stats[0])
+	if err != nil {
+		log.Fatal("Failed to convert HP to an integer.")
+	}
+
+	strength, err := strconv.Atoi(strings.Trim(stats[1], " "))
+	if err != nil {
+		log.Fatal("Failed to convert Strength to an integer.")
+	}
+
+	dexterity, err := strconv.Atoi(strings.Trim(stats[2], " "))
+	if err != nil {
+		log.Fatal("Failed to convert Dexterity to an integer.")
+	}
+
+	constitution, err := strconv.Atoi(strings.Trim(stats[3], " "))
+	if err != nil {
+		log.Fatal("Failed to convert Constitution to an integer.")
+	}
+
+	intelligence, err := strconv.Atoi(strings.Trim(stats[4], " "))
+	if err != nil {
+		log.Fatal("Failed to convert Intelligence to an integer.")
+	}
+
+	wisdom, err := strconv.Atoi(strings.Trim(stats[5], " "))
+	if err != nil {
+		log.Fatal("Failed to convert Wisdom to an integer.")
+	}
+
+	charisma, err := strconv.Atoi(strings.Trim(stats[6], " "))
+	if err != nil {
+		log.Fatal("Failed to convert Charisma to an integer.")
+	}
+
+	character.HP = uint8(hp)
+	character.Strength = uint8(strength)
+	character.Dexterity = uint8(dexterity)
+	character.Constitution = uint8(constitution)
+	character.Intelligence = uint8(intelligence)
+	character.Wisdom = uint8(wisdom)
+	character.Charisma = uint8(charisma)
+}
+
+func submitCharacter(hero Character) tea.Cmd {
+	return func() tea.Msg {
+		db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+		if err != nil {
+			log.Fatal("failed to connect database")
+		}
+
+		db.Save(&Character{
+			Name:           hero.Name,
+			Class:          hero.Class,
+			HP:             hero.HP,
+			Strength:       hero.Strength,
+			Dexterity:      hero.Dexterity,
+			Constitution:   hero.Constitution,
+			Intelligence:   hero.Intelligence,
+			Wisdom:         hero.Wisdom,
+			Charisma:       hero.Charisma,
+			Race:           hero.Race,
+			Feats:          hero.Feats,
+			Items:          hero.Items,
+			Helmet:         hero.Helmet,
+			Cloak:          hero.Cloak,
+			Jewelery1:      hero.Jewelery1,
+			Jewelery2:      hero.Jewelery2,
+			Jewelery3:      hero.Jewelery3,
+			Boots:          hero.Boots,
+			Gloves:         hero.Gloves,
+			MainHandWeapon: hero.MainHandWeapon,
+			OffHandWeapon:  hero.OffHandWeapon,
+		})
+
+		return SwitchStateMsg(characterCreated)
+	}
+}
 
 type FeatureWithChoices struct {
 	Name    string
 	Choices []string
 }
-
-func (i FeatureWithChoices) FilterValue() string { return "" }
 
 type ChoicesMsg []FeatureWithChoices
 
@@ -79,53 +134,28 @@ type TableData struct {
 
 type TableDataMsg TableData
 
-func getRaces() tea.Msg {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
-
-	var races []string
-	db.Table("races").Select("name").Scan(&races)
-	return TableDataMsg(TableData{"Race", races})
-}
-
-func getWeapons() tea.Msg {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
-
-	var weapons []string
-	db.Table("items").Select("name").Where("category = 'Weapon'").Scan(&weapons)
-	return TableDataMsg(TableData{"Weapon", weapons})
-}
-
-func getLightWeapons() tea.Msg {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
-
-	var weapons []string
-	db.Table("items").Select("name").Where("category = 'Weapon' and properties like '%Light%'").Scan(&weapons)
-	return TableDataMsg(TableData{"LightWeapon", weapons})
-}
-
-func getGear(category string) tea.Cmd {
+func getTableData(category string) tea.Cmd {
 	return func() tea.Msg {
 		db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
 		if err != nil {
 			log.Fatal("failed to connect database")
 		}
 
-		var weapons []string
-		db.Table("items").Select("name").Where("type = ?", category).Scan(&weapons)
-		return TableDataMsg(TableData{category, weapons})
+		var choices []string
+		switch category {
+		case "Race":
+			db.Table("races").Select("name").Scan(&choices)
+		case "Weapon":
+			db.Table("items").Select("name").Where("category = 'Weapon'").Scan(&choices)
+		case "LightWeapon":
+			db.Table("items").Select("name").Where("category = 'Weapon' and properties like '%Light%'").Scan(&choices)
+		default:
+			db.Table("items").Select("name").Where("type = ?", category).Scan(&choices)
+		}
+
+		return TableDataMsg(TableData{category, choices})
 	}
 }
-
-type SubmitCharacterMsg bool
 
 func submitChoices(character string, choices []FeatureWithChoices) tea.Cmd {
 	return func() tea.Msg {
@@ -138,17 +168,7 @@ func submitChoices(character string, choices []FeatureWithChoices) tea.Cmd {
 			_ = db.Save(&server.FeatureChoices{Character: character, Feature: feature.Name, Choice: feature.Choices[0]})
 		}
 
-		return SubmitCharacterMsg(true)
-	}
-}
-
-func populateCharacterNames(list list.Model, characterNames []string) tea.Cmd {
-	return func() tea.Msg {
-		for index, choice := range characterNames {
-			list.InsertItem(index, item(choice))
-		}
-
-		return ListMsg(list)
+		return nil
 	}
 }
 
@@ -177,7 +197,6 @@ const (
 type CreateCharacterModel struct {
 	State         State
 	TextInput     textinput.Model
-	Err           error
 	Character     Character
 	List          list.Model
 	Choices       []FeatureWithChoices
@@ -196,106 +215,52 @@ type CreateCharacterModel struct {
 	Jewelery      []string
 }
 
-type CreateListMsg list.Model
-
-func setupInitialCreateList(title string, elements *[]string) tea.Cmd {
-	return func() tea.Msg {
-		items := []list.Item{}
-
-		const defaultWidth = 80
-
-		l := list.New(items, itemDelegate{}, defaultWidth, listHeight)
-		l.Title = title
-		l.SetShowStatusBar(false)
-		l.SetFilteringEnabled(false)
-		l.Styles.Title = titleStyle
-		l.Styles.PaginationStyle = paginationStyle
-		l.Styles.HelpStyle = helpStyle
-
-		for index, element := range *elements {
-			l.InsertItem(index, item(element))
-		}
-
-		return CreateListMsg(l)
-	}
-}
-
-func submitCharacter(hero Character) tea.Cmd {
-	return func() tea.Msg {
-		SubmitCharacter(hero)
-		return SwitchStateMsg(showHome)
-	}
-}
-
-type TextInputMsg textinput.Model
-
-func setupTextInput() tea.Msg {
-	return TextInputMsg(BuildTextInput())
-}
-
 func (m CreateCharacterModel) Init() tea.Cmd {
 	return tea.Batch(
-		getRaces,
+		getTableData("Race"),
 		setupTextInput,
 	)
-
 }
 
 func (m CreateCharacterModel) View() string {
 	if slices.Contains([]State{promptName, promptClass, promptStats, promptFeats, promptItems, promptItems, characterCreated}, m.State) {
+		var prompt string
 		switch m.State {
 		case promptName:
-			return fmt.Sprintf(
-				"Enter the name of the character:\n\n%s\n\n%s",
-				m.TextInput.View(),
-				"(esc to quit)",
-			) + "\n"
+			prompt = "Enter the name of the character:"
 		case promptClass:
-			return fmt.Sprintf(
-				"Enter the classes of the character (| and , delimited like this Paladin|10|Oath of Ancients,Monk|10|Way of the Shadow):\n\n%s\n\n%s",
-				m.TextInput.View(),
-				"(esc to quit)",
-			) + "\n"
-		case promptRace:
-			return m.List.View()
+			prompt = "Enter the classes of the character (| and , delimited like this Paladin|10|Oath of Ancients,Monk|10|Way of the Shadow):"
 		case promptStats:
-			return fmt.Sprintf(
-				"Enter the stats of the character separated by commas (HP, Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma):\n\n%s\n\n%s",
-				m.TextInput.View(),
-				"(esc to quit)",
-			) + "\n"
+			prompt = "Enter the stats of the character separated by commas (HP, Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma):"
 		case promptFeats:
-			return fmt.Sprintf(
-				"Enter the feats your character has separated by commas:\n\n%s\n\n%s",
-				m.TextInput.View(),
-				"(esc to quit)",
-			) + "\n"
+			prompt = "Enter the feats your character has separated by commas:"
 		case promptItems:
-			return fmt.Sprintf(
-				"Enter the items your character has separated by commas:\n\n%s\n\n%s",
-				m.TextInput.View(),
-				"(esc to quit)",
-			) + "\n"
+			prompt = "Enter the items your character has separated by commas:"
 		case characterCreated:
 			return fmt.Sprintf(
-				"%s has been created!\n\n%s\n\n%s",
+				"%s has been created!\n\n%s\n\n",
 				m.Character.Name,
-				"(tab to return home)",
-				"(esc to quit)",
+				"(esc to quit, tab to return home)",
 			) + "\n"
 		}
-	} else {
-		return m.List.View()
-	}
 
-	return "Oops!"
+		return centeredStyle.Render(
+			fmt.Sprintf("%s\n\n%s\n\n%s",
+				prompt,
+				m.TextInput.View(),
+				"(esc to quit)",
+			),
+		)
+	} else {
+		return centeredStyle.Render(m.List.View())
+	}
 }
 
 func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
-	case CreateListMsg:
+	case ListMsg:
 		m.List = list.Model(msg)
 
 	case TextInputMsg:
@@ -336,7 +301,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				m.Character.Name = m.TextInput.Value()
-				return m, tea.Sequence(setupInitialCreateList("Choose your race", &m.Races), switchState(promptRace))
+				return m, tea.Sequence(setupList("Choose your race", &m.Races), switchState(promptRace))
 			}
 		}
 	case promptRace:
@@ -350,14 +315,14 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				}
 
 				return m, tea.Batch(
-					getGear("Cloak"),
-					getGear("Helmet"),
-					getGear("Armor"),
-					getGear("Jewelery"),
-					getGear("Boots"),
-					getGear("Gloves"),
-					getWeapons,
-					getLightWeapons,
+					getTableData("Cloak"),
+					getTableData("Helmet"),
+					getTableData("Armor"),
+					getTableData("Jewelery"),
+					getTableData("Boots"),
+					getTableData("Gloves"),
+					getTableData("Weapon"),
+					getTableData("LightWeapon"),
 					switchState(promptClass),
 				)
 			}
@@ -376,49 +341,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				stats := strings.Split(m.TextInput.Value(), ",")
-				hp, err := strconv.Atoi(stats[0])
-				if err != nil {
-					log.Fatal("Failed to convert HP to an integer.")
-				}
-
-				strength, err := strconv.Atoi(strings.Trim(stats[1], " "))
-				if err != nil {
-					log.Fatal("Failed to convert Strength to an integer.")
-				}
-
-				dexterity, err := strconv.Atoi(strings.Trim(stats[2], " "))
-				if err != nil {
-					log.Fatal("Failed to convert Dexterity to an integer.")
-				}
-
-				constitution, err := strconv.Atoi(strings.Trim(stats[3], " "))
-				if err != nil {
-					log.Fatal("Failed to convert Constitution to an integer.")
-				}
-
-				intelligence, err := strconv.Atoi(strings.Trim(stats[4], " "))
-				if err != nil {
-					log.Fatal("Failed to convert Intelligence to an integer.")
-				}
-
-				wisdom, err := strconv.Atoi(strings.Trim(stats[5], " "))
-				if err != nil {
-					log.Fatal("Failed to convert Wisdom to an integer.")
-				}
-
-				charisma, err := strconv.Atoi(strings.Trim(stats[6], " "))
-				if err != nil {
-					log.Fatal("Failed to convert Charisma to an integer.")
-				}
-
-				m.Character.HP = uint8(hp)
-				m.Character.Strength = uint8(strength)
-				m.Character.Dexterity = uint8(dexterity)
-				m.Character.Constitution = uint8(constitution)
-				m.Character.Intelligence = uint8(intelligence)
-				m.Character.Wisdom = uint8(wisdom)
-				m.Character.Charisma = uint8(charisma)
+				setStats(m.TextInput.Value(), &m.Character)
 				return m, switchState(promptFeats)
 			}
 		}
@@ -437,7 +360,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				m.Character.Items = m.TextInput.Value()
-				return m, tea.Sequence(setupInitialCreateList("What helmet does your character have equipped?", &m.Helmets), switchState(promptHelmet))
+				return m, tea.Sequence(setupList("What helmet does your character have equipped?", &m.Helmets), switchState(promptHelmet))
 			}
 		}
 	case promptHelmet:
@@ -446,7 +369,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				m.Character.Helmet = m.TextInput.Value()
-				return m, tea.Sequence(setupInitialCreateList("What cloak does your character have equipped?", &m.Cloaks), switchState(promptCloak))
+				return m, tea.Sequence(setupList("What cloak does your character have equipped?", &m.Cloaks), switchState(promptCloak))
 			}
 		}
 	case promptCloak:
@@ -458,7 +381,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Cloak = string(i)
 				}
-				return m, tea.Sequence(setupInitialCreateList("What armor does your character have equipped?", &m.Armor), switchState(promptArmor))
+				return m, tea.Sequence(setupList("What armor does your character have equipped?", &m.Armor), switchState(promptArmor))
 			}
 		}
 	case promptArmor:
@@ -470,7 +393,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Armor = string(i)
 				}
-				return m, tea.Sequence(setupInitialCreateList("What's the first piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery1))
+				return m, tea.Sequence(setupList("What's the first piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery1))
 			}
 		}
 	case promptJewelery1:
@@ -482,7 +405,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Jewelery1 = string(i)
 				}
-				return m, tea.Sequence(setupInitialCreateList("What's the second piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery2))
+				return m, tea.Sequence(setupList("What's the second piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery2))
 			}
 		}
 	case promptJewelery2:
@@ -494,7 +417,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Jewelery2 = string(i)
 				}
-				return m, tea.Sequence(setupInitialCreateList("What's the third piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery3))
+				return m, tea.Sequence(setupList("What's the third piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery3))
 			}
 		}
 	case promptJewelery3:
@@ -506,7 +429,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Jewelery3 = string(i)
 				}
-				return m, tea.Sequence(setupInitialCreateList("What boots does your character have equipped?", &m.Boots), switchState(promptBoots))
+				return m, tea.Sequence(setupList("What boots does your character have equipped?", &m.Boots), switchState(promptBoots))
 			}
 		}
 	case promptBoots:
@@ -518,7 +441,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Boots = string(i)
 				}
-				return m, tea.Sequence(setupInitialCreateList("What gloves does your character have equipped?", &m.Gloves), switchState(promptGloves))
+				return m, tea.Sequence(setupList("What gloves does your character have equipped?", &m.Gloves), switchState(promptGloves))
 			}
 		}
 	case promptGloves:
@@ -530,7 +453,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Gloves = string(i)
 				}
-				return m, tea.Sequence(setupInitialCreateList("What main hand weapon does your character have equipped?", &m.Weapons), switchState(promptMainHandWeapon))
+				return m, tea.Sequence(setupList("What main hand weapon does your character have equipped?", &m.Weapons), switchState(promptMainHandWeapon))
 			}
 		}
 	case promptMainHandWeapon:
@@ -542,7 +465,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.MainHandWeapon = string(i)
 				}
-				return m, tea.Sequence(setupInitialCreateList("What off hand weapon does your character have equipped?", &m.LightWeapons), switchState(promptOffhandWeapon))
+				return m, tea.Sequence(setupList("What off hand weapon does your character have equipped?", &m.LightWeapons), switchState(promptOffhandWeapon))
 			}
 		}
 	case promptOffhandWeapon:
@@ -569,9 +492,9 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 
 			// If there's no choices to make then submit the character, otherwise proceed to feature selection.
 			if len(m.Choices) <= m.ChoiceIndex {
-				return m, tea.Sequence(submitCharacter(m.Character), switchState(promptSelection))
+				return m, tea.Sequence(submitCharacter(m.Character))
 			} else {
-				return m, tea.Sequence(setupInitialCreateList("Choose the feature you'd like!", &m.ActiveChoices), switchState(promptSelection))
+				return m, tea.Sequence(setupList("Choose the feature you'd like!", &m.ActiveChoices), switchState(promptSelection))
 			}
 		}
 	case promptSelection:
@@ -590,9 +513,8 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 						return m, tea.Sequence(
 							tea.Batch(
 								submitChoices(m.Character.Name, m.Selections),
-								SubmitCharacter(m.Character),
+								submitCharacter(m.Character),
 							),
-							switchState(characterCreated),
 						)
 					}
 

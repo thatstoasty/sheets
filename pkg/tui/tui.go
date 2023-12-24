@@ -3,13 +3,8 @@ package tui
 import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/thatstoasty/character-sheet-ui/pkg/server"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-	"log"
 	"os"
 )
 
@@ -45,28 +40,6 @@ func setupDB() tea.Msg {
 	return nil
 }
 
-func getCharacterNames() tea.Msg {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
-
-	var names []string
-	db.Table("characters").Select("name").Scan(&names)
-	return CharacterNamesMsg(names)
-}
-
-func BuildTextInput() textinput.Model {
-	ti := textinput.New()
-	ti.Focus()
-	ti.CharLimit = 156
-	ti.Width = 20
-
-	return ti
-}
-
-var docStyle = lipgloss.NewStyle().Margin(1, 2)
-
 // Assigns an incrementing value to each of these constants. 0, then 1, then 2, etc...
 const (
 	showHome State = iota
@@ -87,7 +60,6 @@ type Model struct {
 type itemWithDescription struct {
 	title, desc string
 }
-type CharacterNamesMsg []string
 
 func (i itemWithDescription) Title() string       { return i.title }
 func (i itemWithDescription) Description() string { return i.desc }
@@ -101,9 +73,12 @@ func initialModel() Model {
 		itemWithDescription{title: "Start!", desc: "Starts the web application to generate your interactive character sheet interface!"},
 	}
 
+	list := list.New(items, list.NewDefaultDelegate(), 0, 0)
+	list.Title = "Main Menu"
+
 	return Model{
 		State: showHome,
-		List:  list.New(items, list.NewDefaultDelegate(), 0, 0),
+		List:  list,
 	}
 }
 
@@ -123,7 +98,7 @@ func (m Model) View() string {
 	case showUpdateCharacter:
 		return m.UpdateCharacter.View()
 	default:
-		return docStyle.Render(m.List.View())
+		return centeredStyle.Render(m.List.View())
 	}
 }
 
@@ -158,7 +133,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.State = State(msg)
 
 		case tea.WindowSizeMsg:
-			h, v := docStyle.GetFrameSize()
+			h, v := centeredStyle.GetFrameSize()
 			m.List.SetSize(msg.Width-h, msg.Height-v)
 
 			// Is it a key press?
