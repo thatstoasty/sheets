@@ -28,7 +28,6 @@ var (
 	paginationStyle   = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
 	helpStyle         = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
 	centeredStyle     = baseStyle.Align(lipgloss.Center)
-	leftStyle         = baseStyle.Align(lipgloss.Left)
 )
 
 // Create a bubbles list with the given string items

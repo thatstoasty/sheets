@@ -145,15 +145,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// the selected state for the item that the cursor is pointing at.
 			case "enter":
-				switch m.List.Cursor() {
-				case 0:
-					return m, tea.Sequence(switchState(showCreateCharacter), m.CreateCharacter.Init())
-				case 1:
-					return m, tea.Sequence(switchState(showDeleteCharacter), m.DeleteCharacter.Init())
-				case 2:
-					return m, tea.Sequence(switchState(showUpdateCharacter), m.UpdateCharacter.Init())
-				case 3:
-					return m, startServer()
+				i, ok := m.List.SelectedItem().(itemWithDescription)
+				if ok {
+					switch i.Title() {
+					case "Create Character":
+						return m, tea.Sequence(switchState(showCreateCharacter), m.CreateCharacter.Init())
+					case "Delete Character":
+						return m, tea.Sequence(switchState(showDeleteCharacter), m.DeleteCharacter.Init())
+					case "Update Character":
+						return m, tea.Sequence(switchState(showUpdateCharacter), m.UpdateCharacter.Init())
+					case "Start!":
+						return m, startServer()
+					}
 				}
 			}
 		}

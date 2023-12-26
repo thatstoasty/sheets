@@ -49,7 +49,7 @@ func SetupDB() {
 	// Create Races
 	races := readCSVData("data/players_handbook/races.csv")
 	for _, race := range races {
-		db.Save(&Characteristic{Name: race[0], Options: race[1]})
+		db.Save(&Characteristic{Name: race[0], Type: "Race", Options: race[1]})
 	}
 
 	// Create Races
@@ -60,7 +60,7 @@ func SetupDB() {
 	// Create Feats
 	feats := readCSVData("data/players_handbook/feats.csv")
 	for _, feat := range feats {
-		db.Save(&Characteristic{Name: feat[0], Options: feat[1]})
+		db.Save(&Characteristic{Name: feat[0], Type: "Feat", Options: feat[1]})
 	}
 
 	// Create Items

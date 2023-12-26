@@ -144,16 +144,34 @@ func getTableData(category string) tea.Cmd {
 		var choices []string
 		switch category {
 		case "Race":
-			db.Table("races").Select("name").Scan(&choices)
+			db.Table("characteristics").Distinct("name").Where("type = ?", "Race").Scan(&choices)
 		case "Weapon":
 			db.Table("items").Select("name").Where("category = 'Weapon'").Scan(&choices)
 		case "LightWeapon":
 			db.Table("items").Select("name").Where("category = 'Weapon' and properties like '%Light%'").Scan(&choices)
+		case "Class":
+			db.Table("class_features").Distinct("class").Scan(&choices)
+		case "Feat":
+			db.Table("characteristics").Distinct("name").Where("type = ?", "Feat").Scan(&choices)
 		default:
 			db.Table("items").Select("name").Where("type = ?", category).Scan(&choices)
 		}
 
 		return TableDataMsg(TableData{category, choices})
+	}
+}
+
+func getSubclasses(class string) tea.Cmd {
+	return func() tea.Msg {
+		db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+		if err != nil {
+			log.Fatal("failed to connect database")
+		}
+
+		var choices []string
+		db.Table("class_features").Distinct("sub_class").Where("class = ?", class).Scan(&choices)
+
+		return TableDataMsg(TableData{"Subclass", choices})
 	}
 }
 
@@ -176,7 +194,10 @@ func submitChoices(character string, choices []FeatureWithChoices) tea.Cmd {
 const (
 	promptName State = iota
 	promptRace
+	promptTotalLevel
 	promptClass
+	promptLevel
+	promptSubclass
 	promptStats
 	promptFeats
 	promptItems
@@ -194,25 +215,43 @@ const (
 	characterCreated
 )
 
+type DNDData struct {
+	Races        []string
+	Weapons      []string
+	LightWeapons []string
+	Armor        []string
+	Cloaks       []string
+	Helmets      []string
+	Boots        []string
+	Gloves       []string
+	Jewelery     []string
+	Classes      []string
+	Subclasses   []string
+	Feats        []string
+}
+
+type Class struct {
+	Name     string
+	Level    int
+	Subclass string
+}
+
 type CreateCharacterModel struct {
 	State         State
 	TextInput     textinput.Model
 	Character     Character
+	Classes       []Class
+	Class         string
+	Level         int
+	Subclass      string
+	TotalLevel    int
 	List          list.Model
 	Choices       []FeatureWithChoices
 	ChoiceIndex   int
 	ActiveFeature string
 	ActiveChoices []string
 	Selections    []FeatureWithChoices
-	Races         []string
-	Weapons       []string
-	LightWeapons  []string
-	Armor         []string
-	Cloaks        []string
-	Helmets       []string
-	Boots         []string
-	Gloves        []string
-	Jewelery      []string
+	DND           DNDData
 }
 
 func (m CreateCharacterModel) Init() tea.Cmd {
@@ -223,17 +262,17 @@ func (m CreateCharacterModel) Init() tea.Cmd {
 }
 
 func (m CreateCharacterModel) View() string {
-	if slices.Contains([]State{promptName, promptClass, promptStats, promptFeats, promptItems, promptItems, characterCreated}, m.State) {
+	if slices.Contains([]State{promptName, promptTotalLevel, promptLevel, promptStats, promptItems, characterCreated}, m.State) {
 		var prompt string
 		switch m.State {
 		case promptName:
 			prompt = "Enter the name of the character:"
-		case promptClass:
-			prompt = "Enter the classes of the character (| and , delimited like this Paladin|10|Oath of Ancients,Monk|10|Way of the Shadow):"
+		case promptTotalLevel:
+			prompt = "Enter your character's total level:"
+		case promptLevel:
+			prompt = "Enter the level of the class:"
 		case promptStats:
 			prompt = "Enter the stats of the character separated by commas (HP, Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma):"
-		case promptFeats:
-			prompt = "Enter the feats your character has separated by commas:"
 		case promptItems:
 			prompt = "Enter the items your character has separated by commas:"
 		case characterCreated:
@@ -274,23 +313,29 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		tableData := TableData(msg)
 		switch tableData.Category {
 		case "Weapon":
-			m.Weapons = tableData.Records
+			m.DND.Weapons = tableData.Records
 		case "LightWeapon":
-			m.LightWeapons = tableData.Records
+			m.DND.LightWeapons = tableData.Records
 		case "Armor":
-			m.Armor = tableData.Records
+			m.DND.Armor = tableData.Records
 		case "Helmet":
-			m.Helmets = tableData.Records
+			m.DND.Helmets = tableData.Records
 		case "Cloak":
-			m.Cloaks = tableData.Records
+			m.DND.Cloaks = tableData.Records
 		case "Boots":
-			m.Boots = tableData.Records
+			m.DND.Boots = tableData.Records
 		case "Gloves":
-			m.Gloves = tableData.Records
+			m.DND.Gloves = tableData.Records
 		case "Jewelery":
-			m.Jewelery = tableData.Records
+			m.DND.Jewelery = tableData.Records
 		case "Race":
-			m.Races = tableData.Records
+			m.DND.Races = tableData.Records
+		case "Class":
+			m.DND.Classes = tableData.Records
+		case "Subclass":
+			m.DND.Subclasses = tableData.Records
+		case "Feat":
+			m.DND.Feats = tableData.Records
 		}
 	}
 
@@ -301,7 +346,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				m.Character.Name = m.TextInput.Value()
-				return m, tea.Sequence(setupList("Choose your race", &m.Races), switchState(promptRace))
+				return m, tea.Sequence(setupList("Choose your race", &m.DND.Races), switchState(promptRace))
 			}
 		}
 	case promptRace:
@@ -323,8 +368,23 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 					getTableData("Gloves"),
 					getTableData("Weapon"),
 					getTableData("LightWeapon"),
-					switchState(promptClass),
+					getTableData("Class"),
+					getTableData("Feat"),
+					switchState(promptTotalLevel),
 				)
+			}
+		}
+	case promptTotalLevel:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch keypress := msg.String(); keypress {
+			case "enter":
+				level, err := strconv.Atoi(m.TextInput.Value())
+				if err != nil {
+					log.Fatal("Failed to convert level to an integer.")
+				}
+				m.TotalLevel = level
+				return m, tea.Sequence(setupList("Choose your class:", &m.DND.Classes), switchState(promptClass))
 			}
 		}
 	case promptClass:
@@ -332,8 +392,64 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.Class = m.TextInput.Value()
-				return m, switchState(promptStats)
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Class = string(i)
+				}
+
+				return m, tea.Batch(getSubclasses(m.Class), switchState(promptLevel))
+			}
+		}
+	case promptLevel:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch keypress := msg.String(); keypress {
+			case "enter":
+				level, err := strconv.Atoi(m.TextInput.Value())
+				if err != nil {
+					log.Fatal("Failed to convert level to an integer.")
+				}
+				m.Level = level
+
+				return m, tea.Sequence(setupList("Choose your subclass:", &m.DND.Subclasses), switchState(promptSubclass))
+			}
+		}
+	case promptSubclass:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch keypress := msg.String(); keypress {
+			case "enter":
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Subclass = string(i)
+				}
+
+				// Add submitted class to list of classes
+				m.Classes = append(m.Classes, Class{m.Class, m.Level, m.Subclass})
+
+				// Take a sum of the levels of the classes submitted so far
+				var levelSum uint8
+				for _, class := range m.Classes {
+					levelSum += uint8(class.Level)
+				}
+
+				// Then check if the sum of the class levels is greater than or equal to the total level provided earlier.
+				// If equal, move on to prompt stats otherwise throw an error.
+				if levelSum == uint8(m.TotalLevel) {
+					var classStrings []string
+					for _, class := range m.Classes {
+						classStrings = append(classStrings, fmt.Sprintf("%s|%d|%s", class.Name, class.Level, class.Subclass))
+					}
+					m.Character.Class = strings.Join(classStrings, ",")
+					return m, switchState(promptStats)
+				} else if levelSum < uint8(m.TotalLevel) {
+					m.Class = ""
+					m.Level = 0
+					m.Subclass = ""
+					return m, switchState(promptLevel)
+				} else {
+					log.Fatal("The sum of the class levels is greater than the total level provided!")
+				}
 			}
 		}
 	case promptStats:
@@ -342,7 +458,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				setStats(m.TextInput.Value(), &m.Character)
-				return m, switchState(promptFeats)
+				return m, tea.Sequence(setupList("Choose your feats:", &m.DND.Feats), switchState(promptFeats))
 			}
 		}
 	case promptFeats:
@@ -350,7 +466,10 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.Feats = m.TextInput.Value()
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Character.Feats = string(i)
+				}
 				return m, switchState(promptItems)
 			}
 		}
@@ -360,7 +479,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				m.Character.Items = m.TextInput.Value()
-				return m, tea.Sequence(setupList("What helmet does your character have equipped?", &m.Helmets), switchState(promptHelmet))
+				return m, tea.Sequence(setupList("What helmet does your character have equipped?", &m.DND.Helmets), switchState(promptHelmet))
 			}
 		}
 	case promptHelmet:
@@ -369,7 +488,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				m.Character.Helmet = m.TextInput.Value()
-				return m, tea.Sequence(setupList("What cloak does your character have equipped?", &m.Cloaks), switchState(promptCloak))
+				return m, tea.Sequence(setupList("What cloak does your character have equipped?", &m.DND.Cloaks), switchState(promptCloak))
 			}
 		}
 	case promptCloak:
@@ -381,7 +500,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Cloak = string(i)
 				}
-				return m, tea.Sequence(setupList("What armor does your character have equipped?", &m.Armor), switchState(promptArmor))
+				return m, tea.Sequence(setupList("What armor does your character have equipped?", &m.DND.Armor), switchState(promptArmor))
 			}
 		}
 	case promptArmor:
@@ -393,7 +512,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Armor = string(i)
 				}
-				return m, tea.Sequence(setupList("What's the first piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery1))
+				return m, tea.Sequence(setupList("What's the first piece jewelery your character has equipped?", &m.DND.Jewelery), switchState(promptJewelery1))
 			}
 		}
 	case promptJewelery1:
@@ -405,7 +524,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Jewelery1 = string(i)
 				}
-				return m, tea.Sequence(setupList("What's the second piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery2))
+				return m, tea.Sequence(setupList("What's the second piece jewelery your character has equipped?", &m.DND.Jewelery), switchState(promptJewelery2))
 			}
 		}
 	case promptJewelery2:
@@ -417,7 +536,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Jewelery2 = string(i)
 				}
-				return m, tea.Sequence(setupList("What's the third piece jewelery your character has equipped?", &m.Jewelery), switchState(promptJewelery3))
+				return m, tea.Sequence(setupList("What's the third piece jewelery your character has equipped?", &m.DND.Jewelery), switchState(promptJewelery3))
 			}
 		}
 	case promptJewelery3:
@@ -429,7 +548,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Jewelery3 = string(i)
 				}
-				return m, tea.Sequence(setupList("What boots does your character have equipped?", &m.Boots), switchState(promptBoots))
+				return m, tea.Sequence(setupList("What boots does your character have equipped?", &m.DND.Boots), switchState(promptBoots))
 			}
 		}
 	case promptBoots:
@@ -441,7 +560,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Boots = string(i)
 				}
-				return m, tea.Sequence(setupList("What gloves does your character have equipped?", &m.Gloves), switchState(promptGloves))
+				return m, tea.Sequence(setupList("What gloves does your character have equipped?", &m.DND.Gloves), switchState(promptGloves))
 			}
 		}
 	case promptGloves:
@@ -453,7 +572,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.Gloves = string(i)
 				}
-				return m, tea.Sequence(setupList("What main hand weapon does your character have equipped?", &m.Weapons), switchState(promptMainHandWeapon))
+				return m, tea.Sequence(setupList("What main hand weapon does your character have equipped?", &m.DND.Weapons), switchState(promptMainHandWeapon))
 			}
 		}
 	case promptMainHandWeapon:
@@ -465,7 +584,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if ok {
 					m.Character.MainHandWeapon = string(i)
 				}
-				return m, tea.Sequence(setupList("What off hand weapon does your character have equipped?", &m.LightWeapons), switchState(promptOffhandWeapon))
+				return m, tea.Sequence(setupList("What off hand weapon does your character have equipped?", &m.DND.LightWeapons), switchState(promptOffhandWeapon))
 			}
 		}
 	case promptOffhandWeapon:
@@ -547,7 +666,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		}
 	}
 
-	if slices.Contains([]State{promptName, promptClass, promptStats, promptItems, promptItems}, m.State) {
+	if slices.Contains([]State{promptName, promptTotalLevel, promptLevel, promptStats, promptItems}, m.State) {
 		m.TextInput, cmd = m.TextInput.Update(msg)
 	} else {
 		m.List, cmd = m.List.Update(msg)

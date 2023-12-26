@@ -17,6 +17,7 @@ type ClassFeature struct {
 
 type Characteristic struct {
 	Name        string `gorm:"primaryKey"`
+	Type        string
 	Description string
 	Options     string
 }

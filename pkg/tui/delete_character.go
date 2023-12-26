@@ -10,6 +10,12 @@ import (
 	"log"
 )
 
+const (
+	initializing State = iota
+	selection
+	confirmation
+)
+
 type CharacterNamesMsg []string
 
 func getCharacterNames() tea.Msg {
@@ -39,8 +45,9 @@ func deleteCharacter(name string) tea.Cmd {
 }
 
 type DeleteCharacterModel struct {
-	Initalizing bool
-	List        list.Model
+	State             State
+	List              list.Model
+	SelectedCharacter string
 }
 
 func (m DeleteCharacterModel) Init() tea.Cmd {
@@ -49,37 +56,56 @@ func (m DeleteCharacterModel) Init() tea.Cmd {
 
 func (m DeleteCharacterModel) Update(msg tea.Msg) (DeleteCharacterModel, tea.Cmd) {
 	switch msg := msg.(type) {
-	case ListMsg:
-		m.List = list.Model(msg)
-		m.Initalizing = false
-
-	case RefreshMsg:
-		return m, getCharacterNames
-
-	case CharacterNamesMsg:
-		names := []string(msg)
-		return m, setupList("Which character do you want to delete?", &names)
-
+	case SwitchStateMsg:
+		m.State = State(msg)
+		return m, nil
 	case tea.WindowSizeMsg:
 		m.List.SetWidth(msg.Width)
 		return m, nil
+	case RefreshMsg:
+		return m, getCharacterNames
+	case CharacterNamesMsg:
+		names := []string(msg)
+		return m, setupList("Which character do you want to delete?", &names)
+	case ListMsg:
+		m.List = list.Model(msg)
+		return m, switchState(selection)
+	}
 
-	case tea.KeyMsg:
-		switch keypress := msg.String(); keypress {
-		case "ctrl+c":
-			return m, tea.Quit
+	switch m.State {
+	case selection:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch keypress := msg.String(); keypress {
+			case "ctrl+c":
+				return m, tea.Quit
 
-		case "enter":
-			var cmd tea.Cmd
-			i, ok := m.List.SelectedItem().(item)
-			if ok {
-				cmd = deleteCharacter(string(i))
+			case "enter":
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.SelectedCharacter = string(i)
+				}
+				return m, switchState(confirmation)
+
+			case "tab":
+				return m, switchParentState(showHome)
 			}
+		}
+	case confirmation:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch keypress := msg.String(); keypress {
+			case "ctrl+c":
+				return m, tea.Quit
 
-			return m, cmd
+			case "enter":
+				character := m.SelectedCharacter
+				m.SelectedCharacter = ""
+				return m, deleteCharacter(character)
 
-		case "tab":
-			return m, switchParentState(showHome)
+			case "tab":
+				return m, switchParentState(showHome)
+			}
 		}
 	}
 
@@ -89,12 +115,23 @@ func (m DeleteCharacterModel) Update(msg tea.Msg) (DeleteCharacterModel, tea.Cmd
 }
 
 func (m DeleteCharacterModel) View() string {
-	if m.Initalizing {
-		return "Loading..."
-	} else {
-		return fmt.Sprintf("%s\n\n%s\n",
-			m.List.View(),
-			"(esc to quit, tab to return home)",
+	switch m.State {
+	case selection:
+		return centeredStyle.Render(
+			fmt.Sprintf("%s\n\n%s\n",
+				m.List.View(),
+				"(esc to quit, tab to return home)",
+			),
 		)
+	case confirmation:
+		return centeredStyle.Render(
+			fmt.Sprintf("%s %s?\n\n%s\n",
+				"Are you sure you want to delete",
+				m.SelectedCharacter,
+				"(enter to confirm, esc to quit, tab to return home)",
+			),
+		)
+	default:
+		return "Loading..."
 	}
 }
