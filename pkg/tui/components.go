@@ -13,13 +13,26 @@ import (
 
 // Lipgloss styles for component rendering
 var baseStyle = lipgloss.NewStyle().
-	Margin(1, 2).
+	Margin(1, 1).
 	Border(lipgloss.RoundedBorder()).
 	BorderForeground(lipgloss.Color("63")).
 	PaddingTop(2).
 	PaddingBottom(2).
 	PaddingLeft(4).
-	PaddingRight(4)
+	PaddingRight(4).
+	Width(60).
+	Height(10)
+
+var characterStyle = lipgloss.NewStyle().
+	Margin(1, 1).
+	Border(lipgloss.RoundedBorder()).
+	BorderForeground(lipgloss.Color("63")).
+	PaddingBottom(1).
+	PaddingLeft(1).
+	PaddingRight(4).
+	Align(lipgloss.Left).
+	Width(50).
+	Height(10)
 
 var (
 	titleStyle        = lipgloss.NewStyle().MarginLeft(2)
@@ -37,8 +50,8 @@ func createListWithItems(choices *[]string) list.Model {
 		items = append(items, item(choice))
 	}
 
-	const listWidth = 80
-	const listHeight = 14
+	const listWidth = 50
+	const listHeight = 10
 
 	return list.New(items, itemDelegate{}, listWidth, listHeight)
 }
@@ -94,7 +107,7 @@ func createTextInput() textinput.Model {
 	ti := textinput.New()
 	ti.Focus()
 	ti.CharLimit = 156
-	ti.Width = 80
+	ti.Width = 50
 	ti.PromptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#D70EFF"))
 	ti.TextStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#E978FF"))
 

@@ -68,9 +68,9 @@ func (i itemWithDescription) FilterValue() string { return i.title }
 func initialModel() Model {
 	items := []list.Item{
 		itemWithDescription{title: "Create Character", desc: "Create your character through interactive prompts!"},
-		itemWithDescription{title: "Delete Character", desc: "Delete an existing character"},
-		itemWithDescription{title: "Update Character", desc: "Update an existing character"},
-		itemWithDescription{title: "Start!", desc: "Starts the web application to generate your interactive character sheet interface!"},
+		itemWithDescription{title: "Delete Character", desc: "Delete an existing character!"},
+		itemWithDescription{title: "Update Character", desc: "Update an existing character!"},
+		itemWithDescription{title: "Start!", desc: "Starts the webpage to show your character sheet!"},
 	}
 
 	list := list.New(items, list.NewDefaultDelegate(), 0, 0)
@@ -98,7 +98,7 @@ func (m Model) View() string {
 	case showUpdateCharacter:
 		return m.UpdateCharacter.View()
 	default:
-		return centeredStyle.Render(m.List.View())
+		return baseStyle.Render(m.List.View())
 	}
 }
 

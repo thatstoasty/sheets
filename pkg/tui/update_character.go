@@ -2,10 +2,12 @@ package tui
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"log"
+	"github.com/charmbracelet/lipgloss"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -30,10 +32,27 @@ func updateCharacterAttribute(name string, attribute string, value string) tea.C
 	}
 }
 
+type CharacterMsg Character
+
+func getCharacter(name string) tea.Cmd {
+	return func() tea.Msg {
+		db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+		if err != nil {
+			log.Fatal("failed to connect database")
+		}
+
+		var character Character
+		db.Table("characters").Where("name = ?", name).Scan(&character)
+
+		return CharacterMsg(character)
+	}
+}
+
 type UpdateCharacterModel struct {
 	State             State
 	TextInput         textinput.Model
 	List              list.Model
+	Character         Character
 	SelectedCharacter string
 	SelectedAttribute string
 }
@@ -42,7 +61,27 @@ func (m UpdateCharacterModel) Init() tea.Cmd {
 	return getCharacterNames
 }
 
-func (m UpdateCharacterModel) View() string {
+func (m UpdateCharacterModel) characterView() string {
+	if m.Character.Name == "" {
+		return characterStyle.Render("You'll see more here after giving your character a name!\n\n")
+	} else {
+		// Render the string that represents the character view
+		return characterStyle.Render(lipgloss.JoinVertical(lipgloss.Top,
+			fmt.Sprintf("%s: The %s", m.Character.Name, m.Character.Race),
+			"------------",
+			fmt.Sprintf("%d   %d   %d   %d   %d   %d   %d", m.Character.HP, m.Character.Strength, m.Character.Dexterity, m.Character.Constitution, m.Character.Intelligence, m.Character.Wisdom, m.Character.Charisma),
+			"HP  STR  DEX  CON  INT  WIS  CHA\n",
+			fmt.Sprintf("Class    | %s", m.Character.Class),
+			fmt.Sprintf("Feats    | %s", m.Character.Feats),
+			fmt.Sprintf("Items    | %s", m.Character.Items),
+			fmt.Sprintf("Armor    | %s, %s, %s, %s, %s", m.Character.Helmet, m.Character.Cloak, m.Character.Armor, m.Character.Boots, m.Character.Gloves),
+			fmt.Sprintf("Jewelery | %s, %s, %s", m.Character.Jewelery1, m.Character.Jewelery2, m.Character.Jewelery3),
+			fmt.Sprintf("Weapons  | %s, %s", m.Character.MainHandWeapon, m.Character.OffHandWeapon),
+		))
+	}
+}
+
+func (m UpdateCharacterModel) promptView() string {
 	var prompt string
 	if m.State != updatePrompt {
 		prompt = fmt.Sprintf("%s\n\n%s\n",
@@ -58,6 +97,15 @@ func (m UpdateCharacterModel) View() string {
 	}
 
 	return centeredStyle.Render(prompt)
+}
+
+func (m UpdateCharacterModel) View() string {
+	switch m.State {
+	case selectCharacter:
+		return m.promptView()
+	default:
+		return lipgloss.JoinHorizontal(lipgloss.Top, m.promptView(), m.characterView())
+	}
 }
 
 func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd) {
@@ -94,6 +142,10 @@ func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd
 			m.List = list.Model(msg)
 			return m, nil
 
+		case CharacterMsg:
+			m.Character = Character(msg)
+			return m, nil
+
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "ctrl+c":
@@ -106,7 +158,7 @@ func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd
 				}
 
 				choices := []string{"Race", "HP", "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma", "Class", "Feats", "Items", "Helmet", "Cloak", "Armor", "Gloves", "Boots", "Jewelery1", "Jewelery2", "Jewelery3", "MainHandWeapon", "OffhandWeapon"}
-				return m, tea.Sequence(setupList("What would you like to update?", &choices), switchState(selectAttribute))
+				return m, tea.Sequence(setupList("What would you like to update?", &choices), getCharacter(m.SelectedCharacter), switchState(selectAttribute))
 			}
 		}
 

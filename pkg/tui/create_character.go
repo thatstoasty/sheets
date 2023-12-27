@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/exp/slices"
 
 	"github.com/thatstoasty/character-sheet-ui/pkg/server"
@@ -261,8 +262,42 @@ func (m CreateCharacterModel) Init() tea.Cmd {
 	)
 }
 
-func (m CreateCharacterModel) View() string {
-	if slices.Contains([]State{promptName, promptTotalLevel, promptLevel, promptStats, promptItems, characterCreated}, m.State) {
+func (m CreateCharacterModel) characterView() string {
+	if m.Character.Name == "" {
+		return characterStyle.Render("You'll see more here after giving your character a name!\n\n")
+	} else {
+		// Format classes into a string for display
+		var classes []string
+		for _, class := range m.Classes {
+			classes = append(classes, fmt.Sprintf("Level %d %s - %s", class.Level, class.Name, class.Subclass))
+		}
+
+		// Render the string that represents the character view
+		return characterStyle.Render(lipgloss.JoinVertical(lipgloss.Top,
+			fmt.Sprintf("%s: The level %d %s", m.Character.Name, m.TotalLevel, m.Character.Race),
+			"------------",
+			fmt.Sprintf("%d   %d   %d   %d   %d   %d   %d", m.Character.HP, m.Character.Strength, m.Character.Dexterity, m.Character.Constitution, m.Character.Intelligence, m.Character.Wisdom, m.Character.Charisma),
+			"HP  STR  DEX  CON  INT  WIS  CHA\n",
+			fmt.Sprintf("Class    | %s", strings.Join(classes, ", ")),
+			fmt.Sprintf("Feats    | %s", m.Character.Feats),
+			fmt.Sprintf("Items    | %s", m.Character.Items),
+			fmt.Sprintf("Armor    | %s, %s, %s, %s, %s", m.Character.Helmet, m.Character.Cloak, m.Character.Armor, m.Character.Boots, m.Character.Gloves),
+			fmt.Sprintf("Jewelery | %s, %s, %s", m.Character.Jewelery1, m.Character.Jewelery2, m.Character.Jewelery3),
+			fmt.Sprintf("Weapons  | %s, %s", m.Character.MainHandWeapon, m.Character.OffHandWeapon),
+		))
+	}
+}
+
+func (m CreateCharacterModel) promptView() string {
+	if m.State == characterCreated {
+		return fmt.Sprintf(
+			"%s has been created!\n\n%s\n\n",
+			"Your character",
+			"(esc to quit, tab to return home)",
+		) + "\n"
+	}
+
+	if slices.Contains([]State{promptName, promptTotalLevel, promptLevel, promptStats, promptItems}, m.State) {
 		var prompt string
 		switch m.State {
 		case promptName:
@@ -272,15 +307,9 @@ func (m CreateCharacterModel) View() string {
 		case promptLevel:
 			prompt = "Enter the level of the class:"
 		case promptStats:
-			prompt = "Enter the stats of the character separated by commas (HP, Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma):"
+			prompt = "Enter the stats of the character separated by commas\n(HP, Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma):"
 		case promptItems:
 			prompt = "Enter the items your character has separated by commas:"
-		case characterCreated:
-			return fmt.Sprintf(
-				"%s has been created!\n\n%s\n\n",
-				m.Character.Name,
-				"(esc to quit, tab to return home)",
-			) + "\n"
 		}
 
 		return centeredStyle.Render(
@@ -293,6 +322,10 @@ func (m CreateCharacterModel) View() string {
 	} else {
 		return centeredStyle.Render(m.List.View())
 	}
+}
+
+func (m CreateCharacterModel) View() string {
+	return lipgloss.JoinHorizontal(lipgloss.Top, m.promptView(), m.characterView())
 }
 
 func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd) {
@@ -383,6 +416,10 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 				if err != nil {
 					log.Fatal("Failed to convert level to an integer.")
 				}
+
+				if level < 1 || level > 20 {
+					log.Fatal("Level must be between 1 and 20.")
+				}
 				m.TotalLevel = level
 				return m, tea.Sequence(setupList("Choose your class:", &m.DND.Classes), switchState(promptClass))
 			}
@@ -446,7 +483,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 					m.Class = ""
 					m.Level = 0
 					m.Subclass = ""
-					return m, switchState(promptLevel)
+					return m, tea.Sequence(setupList("Choose your class:", &m.DND.Classes), switchState(promptClass))
 				} else {
 					log.Fatal("The sum of the class levels is greater than the total level provided!")
 				}
@@ -658,6 +695,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "tab":
+				m.Character = Character{}
 				m.ChoiceIndex = 0
 				return m, tea.Sequence(switchState(promptName), switchParentState(showHome))
 			case "esc":
