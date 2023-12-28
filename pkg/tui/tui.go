@@ -2,10 +2,12 @@ package tui
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/thatstoasty/character-sheet-ui/pkg/database"
 	"github.com/thatstoasty/character-sheet-ui/pkg/server"
-	"os"
 )
 
 func startServer() tea.Cmd {
@@ -34,8 +36,8 @@ type SwitchParentStateMsg State
 // Define what menu is being shown by using an state constants
 type State int
 
-func setupDB() tea.Msg {
-	server.SetupDB()
+func SetupDB() tea.Msg {
+	database.SetupDB()
 
 	return nil
 }
@@ -84,7 +86,7 @@ func initialModel() Model {
 
 func (m Model) Init() tea.Cmd {
 	return tea.Sequence(
-		setupDB,
+		SetupDB,
 		getCharacterNames,
 	)
 }

@@ -1,4 +1,4 @@
-package server
+package database
 
 var armorData = []Item{
 	{Name: "Leather Helmet", Category: "Armor", Type: "Helmet", Description: "A leather helmet."},

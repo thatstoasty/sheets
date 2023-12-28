@@ -7,45 +7,9 @@ import (
 	"strings"
 
 	"gorm.io/gorm"
+
+	"github.com/thatstoasty/character-sheet-ui/pkg/database"
 )
-
-type ClassInfo struct {
-	Class    string
-	Level    string
-	SubClass string
-}
-
-type ScoreWithModifier struct {
-	Score    uint8
-	Modifier int8
-}
-
-type OptionWithDescription struct {
-	Name        string
-	Description string
-}
-
-type CharacterInfo struct {
-	Name             string
-	Race             string
-	HP               uint8
-	Proficiency      uint8
-	Strength         ScoreWithModifier
-	Dexterity        ScoreWithModifier
-	Constitution     ScoreWithModifier
-	Intelligence     ScoreWithModifier
-	Wisdom           ScoreWithModifier
-	Charisma         ScoreWithModifier
-	ClassInfo        []ClassInfo
-	Actions          []Option
-	BonusActions     []Option
-	Passives         []Option
-	Reactions        []Option
-	FreeActions      []Option
-	NonCombatActions []Option
-	Items            []string
-	Equipped         []string
-}
 
 func CalculateAbilityScore(score uint8) int8 {
 	abilityModifier := float64(score) - 10
@@ -72,8 +36,7 @@ func CalculateProficiencyScore(characterLevel uint8) uint8 {
 }
 
 func addRaceOptions(db *gorm.DB, characterRace string, options *[]string) {
-	var raceRecords []Characteristic
-	_ = db.Find(&raceRecords, "name in ?", []string{characterRace, "Default"})
+	raceRecords := database.GetRaceRecords(db, characterRace)
 
 	for _, race := range raceRecords {
 		raceOptions := strings.Split(race.Options, "|")
@@ -81,21 +44,17 @@ func addRaceOptions(db *gorm.DB, characterRace string, options *[]string) {
 	}
 }
 
-func addGearOptions(db *gorm.DB, character Character, options *[]string) {
-	gear := []string{character.Helmet, character.Armor, character.Boots, character.Cloak, character.Jewelery1, character.Jewelery2, character.Jewelery3}
-	var gearRecords []Characteristic
-	_ = db.Find(&gearRecords, "name in ?", gear)
-
-	for _, gear := range gearRecords {
+func addGearOptions(db *gorm.DB, character database.Character, options *[]string) {
+	armor := []string{character.Helmet, character.Armor, character.Boots, character.Cloak, character.Jewelery1, character.Jewelery2, character.Jewelery3}
+	armorRecords := database.GetItemCategoryRecords(db, "Armor", armor)
+	for _, gear := range armorRecords {
 		gearOptions := strings.Split(gear.Options, "|")
 		*options = append(*options, gearOptions...)
 	}
 
 	weapons := []string{character.MainHandWeapon, character.OffHandWeapon}
-	var weaponRecords []Characteristic
-	_ = db.Find(&weaponRecords, "name in ?", weapons)
-
-	for _, weapon := range gearRecords {
+	weaponRecords := database.GetItemCategoryRecords(db, "Weapon", weapons)
+	for _, weapon := range weaponRecords {
 		weaponOptions := strings.Split(weapon.Options, "|")
 		*options = append(*options, weaponOptions...)
 	}
@@ -103,9 +62,7 @@ func addGearOptions(db *gorm.DB, character Character, options *[]string) {
 
 func addItemOptions(db *gorm.DB, characterItems string, options *[]string) {
 	items := strings.Split(characterItems, ",")
-	var itemRecords []Item
-	_ = db.Find(&itemRecords, "name in ?", items)
-
+	itemRecords := database.GetItemRecords(db, items)
 	for _, item := range itemRecords {
 		itemOptions := strings.Split(item.Options, "|")
 		*options = append(*options, itemOptions...)
@@ -114,24 +71,27 @@ func addItemOptions(db *gorm.DB, characterItems string, options *[]string) {
 
 func addFeatOptions(db *gorm.DB, characterFeats string, options *[]string) {
 	feats := strings.Split(characterFeats, ",")
-	var featRecords []Item
-	_ = db.Find(&featRecords, "name in ?", feats)
-
+	featRecords := database.GetFeatRecords(db, feats)
 	for _, feat := range featRecords {
 		featOptions := strings.Split(feat.Options, "|")
 		*options = append(*options, featOptions...)
 	}
 }
 
+type ClassInfo struct {
+	Class    string
+	Level    string
+	SubClass string
+}
+
 func addClassOptions(db *gorm.DB, characterClass string, characterLevel uint8, classInfo []ClassInfo, options *[]string) {
 	allClassInfo := strings.Split(characterClass, ",")
-	var allClassFeatureRecords []ClassFeature
+	var allClassFeatureRecords []database.ClassFeature
 
 	for _, class := range allClassInfo {
 		classConfig := strings.Split(class, "|")
 
-		var classFeatureRecords []ClassFeature
-		_ = db.Where("class = ? AND level <= ? AND sub_class in ?", classConfig[0], classConfig[1], []string{"Base", classConfig[2]}).Find(&classFeatureRecords)
+		classFeatureRecords := database.GetClassFeatureRecords(db, classConfig[0], classConfig[1], classConfig[2])
 		allClassFeatureRecords = append(allClassFeatureRecords, classFeatureRecords...)
 		classInfo = append(classInfo, ClassInfo{Class: classConfig[0], Level: classConfig[1], SubClass: classConfig[2]})
 
@@ -148,7 +108,7 @@ func addClassOptions(db *gorm.DB, characterClass string, characterLevel uint8, c
 	}
 }
 
-func GetCharacterOptions(db *gorm.DB, character Character, characterLevel uint8, classInfo []ClassInfo) []string {
+func GetCharacterOptions(db *gorm.DB, character database.Character, characterLevel uint8, classInfo []ClassInfo) []string {
 	var options []string
 
 	addRaceOptions(db, character.Race, &options)
@@ -160,23 +120,51 @@ func GetCharacterOptions(db *gorm.DB, character Character, characterLevel uint8,
 	return options
 }
 
+type ScoreWithModifier struct {
+	Score    uint8
+	Modifier int8
+}
+
+type CharacterInfo struct {
+	Name             string
+	Race             string
+	HP               uint8
+	Proficiency      uint8
+	Strength         ScoreWithModifier
+	Dexterity        ScoreWithModifier
+	Constitution     ScoreWithModifier
+	Intelligence     ScoreWithModifier
+	Wisdom           ScoreWithModifier
+	Charisma         ScoreWithModifier
+	ClassInfo        []ClassInfo
+	Actions          []database.Option
+	BonusActions     []database.Option
+	Passives         []database.Option
+	Reactions        []database.Option
+	FreeActions      []database.Option
+	NonCombatActions []database.Option
+	Items            []string
+	Equipped         []string
+}
+
 func GetCharacterInfo(db *gorm.DB, name string) CharacterInfo {
-	var character Character
-	db.First(&character, "name = ?", name)
+	character := database.GetCharacter(db, name)
 
-	var classInfo []ClassInfo
-	var characterLevel uint8 = 0
+	var (
+		classInfo      []ClassInfo
+		characterLevel uint8 = 0
+	)
 	options := GetCharacterOptions(db, character, characterLevel, classInfo)
+	optionRecords := database.GetOptionRecords(db, options)
 
-	var optionRecords []Option
-	_ = db.Find(&optionRecords, "name in ?", options)
-
-	var actions []Option
-	var bonusActions []Option
-	var passives []Option
-	var reactions []Option
-	var freeActions []Option
-	var nonCombatActions []Option
+	var (
+		actions          []database.Option
+		bonusActions     []database.Option
+		passives         []database.Option
+		reactions        []database.Option
+		freeActions      []database.Option
+		nonCombatActions []database.Option
+	)
 
 	for _, opt := range optionRecords {
 		switch {

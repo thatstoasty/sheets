@@ -1,4 +1,4 @@
-package server
+package database
 
 var barbarianData = []ClassFeature{
 	{Name: "Rage", Class: "Barbarian", Type: "NoChoice", SubClass: "Base", Level: 1, Options: "Rage"},

@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"text/template"
 
@@ -11,8 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	"github.com/thatstoasty/character-sheet-ui/pkg/database"
 )
 
 func GetIndex(c echo.Context) error {
@@ -20,20 +18,14 @@ func GetIndex(c echo.Context) error {
 }
 
 func GetCharacter(c echo.Context) error {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
+	db := database.GetDatabaseSession()
 	characterInfo := GetCharacterInfo(db, c.QueryParam("name"))
 
 	return c.Render(http.StatusOK, "character", characterInfo)
 }
 
 func GetCharacterNames(c echo.Context) error {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
+	db := database.GetDatabaseSession()
 
 	var names []string
 	db.Table("characters").Select("name").Scan(&names)
@@ -41,39 +33,35 @@ func GetCharacterNames(c echo.Context) error {
 	return c.Render(http.StatusOK, "drop_down", names)
 }
 
+type OptionWithDescription struct {
+	Name        string
+	Description string
+}
+
 func GetOptionDescription(c echo.Context) error {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
+	db := database.GetDatabaseSession()
 
 	name := c.Request().Header["Hx-Trigger-Name"][0]
 
-	var option Option
+	var option database.Option
 	db.Table("options").Select("description").Where("name = ?", name).First(&option)
 
 	return c.Render(http.StatusOK, "description", OptionWithDescription{name, option.Description})
 }
 
 func GetItemDescription(c echo.Context) error {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
+	db := database.GetDatabaseSession()
 
 	name := c.Request().Header["Hx-Trigger-Name"][0]
 
-	var option Option
+	var option database.Option
 	db.Table("items").Select("description").Where("name = ?", name).First(&option)
 
 	return c.Render(http.StatusOK, "description", OptionWithDescription{name, option.Description})
 }
 
 func SubmitCharacter(c echo.Context) error {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
+	db := database.GetDatabaseSession()
 
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
@@ -86,14 +74,14 @@ func SubmitCharacter(c echo.Context) error {
 	}
 	defer file.Close()
 
-	var hero Character
+	var hero database.Character
 	fileDecoder := toml.NewDecoder(file)
 	_, err = fileDecoder.Decode(&hero)
 	if err != nil {
 		panic(err)
 	}
 
-	db.Save(&Character{
+	db.Save(&database.Character{
 		Name:           hero.Name,
 		Class:          hero.Class,
 		HP:             hero.HP,

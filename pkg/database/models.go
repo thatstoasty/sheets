@@ -1,4 +1,4 @@
-package tui
+package database
 
 type Option struct {
 	Name        string `gorm:"primaryKey"`
@@ -17,12 +17,14 @@ type ClassFeature struct {
 
 type Characteristic struct {
 	Name        string `gorm:"primaryKey"`
+	Type        string
 	Description string
 	Options     string
 }
 
 type Item struct {
 	Name        string `gorm:"primaryKey"`
+	Category    string
 	Type        string
 	Description string
 	Properties  string
@@ -65,6 +67,12 @@ type Character struct {
 type Inventory struct {
 	Character string `gorm:"primaryKey"`
 	Item      string
+}
+
+type FeatureChoices struct {
+	Character string `gorm:"primaryKey"`
+	Feature   string `gorm:"primaryKey"`
+	Choice    string
 }
 
 type Config struct {

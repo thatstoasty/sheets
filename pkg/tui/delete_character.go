@@ -2,12 +2,15 @@ package tui
 
 import (
 	"fmt"
+	"log"
+	"os"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"log"
+
+	"github.com/thatstoasty/character-sheet-ui/pkg/database"
 )
 
 const (
@@ -19,10 +22,7 @@ const (
 type CharacterNamesMsg []string
 
 func getCharacterNames() tea.Msg {
-	db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database")
-	}
+	db := database.GetDatabaseSession()
 
 	var names []string
 	db.Table("characters").Select("name").Scan(&names)
@@ -33,12 +33,12 @@ type RefreshMsg bool
 
 func deleteCharacter(name string) tea.Cmd {
 	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+		db, err := gorm.Open(sqlite.Open(os.Getenv("SHEETS_DATABASE")), &gorm.Config{})
 		if err != nil {
 			log.Fatal("failed to connect database")
 		}
 
-		db.Where("name = ?", name).Delete(&Character{})
+		db.Where("name = ?", name).Delete(&database.Character{})
 
 		return RefreshMsg(true)
 	}

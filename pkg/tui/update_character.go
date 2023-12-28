@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -11,6 +12,8 @@ import (
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+
+	"github.com/thatstoasty/character-sheet-ui/pkg/database"
 )
 
 const (
@@ -21,7 +24,7 @@ const (
 
 func updateCharacterAttribute(name string, attribute string, value string) tea.Cmd {
 	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+		db, err := gorm.Open(sqlite.Open(os.Getenv("SHEETS_DATABASE")), &gorm.Config{})
 		if err != nil {
 			log.Fatal("failed to connect database")
 		}
@@ -32,16 +35,16 @@ func updateCharacterAttribute(name string, attribute string, value string) tea.C
 	}
 }
 
-type CharacterMsg Character
+type CharacterMsg database.Character
 
 func getCharacter(name string) tea.Cmd {
 	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open("file.db"), &gorm.Config{})
+		db, err := gorm.Open(sqlite.Open(os.Getenv("SHEETS_DATABASE")), &gorm.Config{})
 		if err != nil {
 			log.Fatal("failed to connect database")
 		}
 
-		var character Character
+		var character database.Character
 		db.Table("characters").Where("name = ?", name).Scan(&character)
 
 		return CharacterMsg(character)
@@ -52,7 +55,7 @@ type UpdateCharacterModel struct {
 	State             State
 	TextInput         textinput.Model
 	List              list.Model
-	Character         Character
+	Character         database.Character
 	SelectedCharacter string
 	SelectedAttribute string
 }
@@ -143,7 +146,7 @@ func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd
 			return m, nil
 
 		case CharacterMsg:
-			m.Character = Character(msg)
+			m.Character = database.Character(msg)
 			return m, nil
 
 		case tea.KeyMsg:
