@@ -20,7 +20,7 @@ var baseStyle = lipgloss.NewStyle().
 	PaddingBottom(2).
 	PaddingLeft(4).
 	PaddingRight(4).
-	Width(60).
+	Width(75).
 	Height(10)
 
 var characterStyle = lipgloss.NewStyle().

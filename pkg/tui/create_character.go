@@ -241,6 +241,7 @@ type CreateCharacterModel struct {
 	State         State
 	TextInput     textinput.Model
 	Character     Character
+	Feats         []string
 	Classes       []Class
 	Class         string
 	Level         int
@@ -279,7 +280,7 @@ func (m CreateCharacterModel) characterView() string {
 			fmt.Sprintf("%d   %d   %d   %d   %d   %d   %d", m.Character.HP, m.Character.Strength, m.Character.Dexterity, m.Character.Constitution, m.Character.Intelligence, m.Character.Wisdom, m.Character.Charisma),
 			"HP  STR  DEX  CON  INT  WIS  CHA\n",
 			fmt.Sprintf("Class    | %s", strings.Join(classes, ", ")),
-			fmt.Sprintf("Feats    | %s", m.Character.Feats),
+			fmt.Sprintf("Feats    | %s", strings.Join(m.Feats, ", ")),
 			fmt.Sprintf("Items    | %s", m.Character.Items),
 			fmt.Sprintf("Armor    | %s, %s, %s, %s, %s", m.Character.Helmet, m.Character.Cloak, m.Character.Armor, m.Character.Boots, m.Character.Gloves),
 			fmt.Sprintf("Jewelery | %s, %s, %s", m.Character.Jewelery1, m.Character.Jewelery2, m.Character.Jewelery3),
@@ -290,11 +291,11 @@ func (m CreateCharacterModel) characterView() string {
 
 func (m CreateCharacterModel) promptView() string {
 	if m.State == characterCreated {
-		return fmt.Sprintf(
-			"%s has been created!\n\n%s\n\n",
-			"Your character",
+		return centeredStyle.Render(fmt.Sprintf(
+			"Your character %s has been created!\n\n%s\n\n",
+			m.Character.Name,
 			"(esc to quit, tab to return home)",
-		) + "\n"
+		))
 	}
 
 	if slices.Contains([]State{promptName, promptTotalLevel, promptLevel, promptStats, promptItems}, m.State) {
@@ -325,7 +326,11 @@ func (m CreateCharacterModel) promptView() string {
 }
 
 func (m CreateCharacterModel) View() string {
-	return lipgloss.JoinHorizontal(lipgloss.Top, m.promptView(), m.characterView())
+	if m.State == characterCreated {
+		return m.promptView()
+	} else {
+		return lipgloss.JoinHorizontal(lipgloss.Top, m.promptView(), m.characterView())
+	}
 }
 
 func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd) {
@@ -495,7 +500,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			switch keypress := msg.String(); keypress {
 			case "enter":
 				setStats(m.TextInput.Value(), &m.Character)
-				return m, tea.Sequence(setupList("Choose your feats:", &m.DND.Feats), switchState(promptFeats))
+				return m, tea.Sequence(setupList("Choose your feats with enter, press tab to continue:", &m.DND.Feats), switchState(promptFeats))
 			}
 		}
 	case promptFeats:
@@ -505,8 +510,13 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 			case "enter":
 				i, ok := m.List.SelectedItem().(item)
 				if ok {
-					m.Character.Feats = string(i)
+					m.Feats = append(m.Feats, string(i))
 				}
+
+				return m, nil
+
+			case "tab":
+				m.Character.Feats = strings.Join(m.Feats, ",")
 				return m, switchState(promptItems)
 			}
 		}
