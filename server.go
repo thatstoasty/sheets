@@ -68,14 +68,14 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-//go:embed templates/*.html css/*.css content/*.png
+//go:embed web/*
 var content embed.FS
 
 func startWebServer() {
 	// Echo instance
 	server := echo.New()
 
-	absPath, _ := filepath.Abs("templates")
+	absPath, _ := filepath.Abs("web")
 	// Middleware
 	server.Use(
 		middleware.Logger(),
@@ -99,14 +99,13 @@ func startWebServer() {
 
 	// This will initiate our template renderer
 	t := &Template{
-		templates: template.Must(template.ParseGlob("templates/*.html")),
+		templates: template.Must(template.ParseGlob("web/*.html")),
 	}
 	server.Renderer = t
 
 	server.GET("/", GetIndex)
-	server.File("/css/output.css", "css/output.css")
-	server.File("/favicon.ico", "content/favicon.ico")
-	server.File("/content/gun.png", "content/gun.png")
+	server.File("/web/styles.css", "web/styles.css")
+	server.File("/favicon.ico", "web/favicon.ico")
 
 	//// character
 	server.GET("/character", GetCharacter)

@@ -177,6 +177,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
+// Start the bubbletea TUI application
 func startTUI() {
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
