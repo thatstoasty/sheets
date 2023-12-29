@@ -3,7 +3,6 @@ module github.com/thatstoasty/character-sheet-ui
 go 1.21.1
 
 require (
-	github.com/BurntSushi/toml v1.3.2
 	github.com/charmbracelet/lipgloss v0.7.1
 	github.com/labstack/echo/v4 v4.11.1
 	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611

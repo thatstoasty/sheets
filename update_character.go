@@ -1,19 +1,12 @@
-package tui
+package main
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-
-	"github.com/thatstoasty/character-sheet-ui/pkg/database"
 )
 
 const (
@@ -24,10 +17,7 @@ const (
 
 func updateCharacterAttribute(name string, attribute string, value string) tea.Cmd {
 	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open(os.Getenv("SHEETS_DATABASE")), &gorm.Config{})
-		if err != nil {
-			log.Fatal("failed to connect database")
-		}
+		db := getDatabaseSession()
 
 		db.Table("characters").Where("name = ?", name).Update(attribute, value)
 
@@ -35,17 +25,12 @@ func updateCharacterAttribute(name string, attribute string, value string) tea.C
 	}
 }
 
-type CharacterMsg database.Character
+type CharacterMsg Character
 
-func getCharacter(name string) tea.Cmd {
+func fetchCharacter(name string) tea.Cmd {
 	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open(os.Getenv("SHEETS_DATABASE")), &gorm.Config{})
-		if err != nil {
-			log.Fatal("failed to connect database")
-		}
-
-		var character database.Character
-		db.Table("characters").Where("name = ?", name).Scan(&character)
+		db := getDatabaseSession()
+		character := getCharacter(db, name)
 
 		return CharacterMsg(character)
 	}
@@ -55,13 +40,13 @@ type UpdateCharacterModel struct {
 	State             State
 	TextInput         textinput.Model
 	List              list.Model
-	Character         database.Character
+	Character         Character
 	SelectedCharacter string
 	SelectedAttribute string
 }
 
 func (m UpdateCharacterModel) Init() tea.Cmd {
-	return getCharacterNames
+	return fetchCharacterNames
 }
 
 func (m UpdateCharacterModel) characterView() string {
@@ -146,7 +131,7 @@ func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd
 			return m, nil
 
 		case CharacterMsg:
-			m.Character = database.Character(msg)
+			m.Character = Character(msg)
 			return m, nil
 
 		case tea.KeyMsg:
@@ -161,7 +146,7 @@ func (m UpdateCharacterModel) Update(msg tea.Msg) (UpdateCharacterModel, tea.Cmd
 				}
 
 				choices := []string{"Race", "HP", "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma", "Class", "Feats", "Items", "Helmet", "Cloak", "Armor", "Gloves", "Boots", "Jewelery1", "Jewelery2", "Jewelery3", "MainHandWeapon", "OffhandWeapon"}
-				return m, tea.Sequence(setupList("What would you like to update?", &choices), getCharacter(m.SelectedCharacter), switchState(selectAttribute))
+				return m, tea.Sequence(setupList("What would you like to update?", &choices), fetchCharacter(m.SelectedCharacter), switchState(selectAttribute))
 			}
 		}
 

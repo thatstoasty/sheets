@@ -1,16 +1,10 @@
-package tui
+package main
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-
-	"github.com/thatstoasty/character-sheet-ui/pkg/database"
 )
 
 const (
@@ -21,25 +15,18 @@ const (
 
 type CharacterNamesMsg []string
 
-func getCharacterNames() tea.Msg {
-	db := database.GetDatabaseSession()
-
-	var names []string
-	db.Table("characters").Select("name").Scan(&names)
+func fetchCharacterNames() tea.Msg {
+	db := getDatabaseSession()
+	names := getCharacterNames(db)
 	return CharacterNamesMsg(names)
 }
 
 type RefreshMsg bool
 
-func deleteCharacter(name string) tea.Cmd {
+func removeCharacter(name string) tea.Cmd {
 	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open(os.Getenv("SHEETS_DATABASE")), &gorm.Config{})
-		if err != nil {
-			log.Fatal("failed to connect database")
-		}
-
-		db.Where("name = ?", name).Delete(&database.Character{})
-
+		db := getDatabaseSession()
+		deleteCharacter(db, name)
 		return RefreshMsg(true)
 	}
 }
@@ -51,7 +38,7 @@ type DeleteCharacterModel struct {
 }
 
 func (m DeleteCharacterModel) Init() tea.Cmd {
-	return getCharacterNames
+	return fetchCharacterNames
 }
 
 func (m DeleteCharacterModel) Update(msg tea.Msg) (DeleteCharacterModel, tea.Cmd) {
@@ -63,7 +50,7 @@ func (m DeleteCharacterModel) Update(msg tea.Msg) (DeleteCharacterModel, tea.Cmd
 		m.List.SetWidth(msg.Width)
 		return m, nil
 	case RefreshMsg:
-		return m, getCharacterNames
+		return m, fetchCharacterNames
 	case CharacterNamesMsg:
 		names := []string(msg)
 		return m, setupList("Which character do you want to delete?", &names)
@@ -101,7 +88,7 @@ func (m DeleteCharacterModel) Update(msg tea.Msg) (DeleteCharacterModel, tea.Cmd
 			case "enter":
 				character := m.SelectedCharacter
 				m.SelectedCharacter = ""
-				return m, deleteCharacter(character)
+				return m, removeCharacter(character)
 
 			case "tab":
 				return m, switchParentState(showHome)

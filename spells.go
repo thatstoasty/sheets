@@ -1,4 +1,4 @@
-package database
+package main
 
 var spellData = []Spell{
 	{Name: "Firebolt", Level: 0, Description: "Firebolt Cantrip", Options: "Firebolt"},

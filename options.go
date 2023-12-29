@@ -1,4 +1,4 @@
-package database
+package main
 
 var featOptions = []Option{
 	{Name: "Physical Training", Type: "ModifyCharacter", Description: "Increase your Strength or Dexterity score by 1, to a maximum of 20."},

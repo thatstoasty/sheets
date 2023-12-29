@@ -1,9 +1,8 @@
-package tui
+package main
 
 import (
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 
@@ -12,13 +11,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/exp/slices"
-
-	"github.com/thatstoasty/character-sheet-ui/pkg/database"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
-func setStats(input string, character *database.Character) {
+func setStats(input string, character *Character) {
 	stats := strings.Split(input, ",")
 	hp, err := strconv.Atoi(stats[0])
 	if err != nil {
@@ -64,14 +59,11 @@ func setStats(input string, character *database.Character) {
 	character.Charisma = uint8(charisma)
 }
 
-func submitCharacter(hero database.Character) tea.Cmd {
+func submitCharacter(hero Character) tea.Cmd {
 	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open(os.Getenv("SHEETS_DATABASE")), &gorm.Config{})
-		if err != nil {
-			log.Fatal("failed to connect database")
-		}
+		db := getDatabaseSession()
 
-		db.Save(&database.Character{
+		db.Save(&Character{
 			Name:           hero.Name,
 			Class:          hero.Class,
 			HP:             hero.HP,
@@ -108,14 +100,11 @@ type ChoicesMsg []FeatureWithChoices
 
 func getChoices(class string) tea.Cmd {
 	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open(os.Getenv("SHEETS_DATABASE")), &gorm.Config{})
-		if err != nil {
-			log.Fatal("failed to connect database")
-		}
+		db := getDatabaseSession()
 
 		classes := strings.Split(class, ",")
 
-		var records []database.ClassFeature
+		var records []ClassFeature
 		var features []FeatureWithChoices
 		for _, class := range classes {
 			classConfig := strings.Split(class, "|")
@@ -138,10 +127,7 @@ type TableDataMsg TableData
 
 func getTableData(category string) tea.Cmd {
 	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open(os.Getenv("SHEETS_DATABASE")), &gorm.Config{})
-		if err != nil {
-			log.Fatal("failed to connect database")
-		}
+		db := getDatabaseSession()
 
 		var choices []string
 		switch category {
@@ -165,10 +151,7 @@ func getTableData(category string) tea.Cmd {
 
 func getSubclasses(class string) tea.Cmd {
 	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open(os.Getenv("SHEETS_DATABASE")), &gorm.Config{})
-		if err != nil {
-			log.Fatal("failed to connect database")
-		}
+		db := getDatabaseSession()
 
 		var choices []string
 		db.Table("class_features").Distinct("sub_class").Where("class = ?", class).Scan(&choices)
@@ -179,13 +162,10 @@ func getSubclasses(class string) tea.Cmd {
 
 func submitChoices(character string, choices []FeatureWithChoices) tea.Cmd {
 	return func() tea.Msg {
-		db, err := gorm.Open(sqlite.Open(os.Getenv("SHEETS_DATABASE")), &gorm.Config{})
-		if err != nil {
-			log.Fatal("failed to connect database")
-		}
+		db := getDatabaseSession()
 
 		for _, feature := range choices {
-			_ = db.Save(&database.FeatureChoices{Character: character, Feature: feature.Name, Choice: feature.Choices[0]})
+			_ = db.Save(&FeatureChoices{Character: character, Feature: feature.Name, Choice: feature.Choices[0]})
 		}
 
 		return nil
@@ -241,7 +221,7 @@ type Class struct {
 type CreateCharacterModel struct {
 	State         State
 	TextInput     textinput.Model
-	Character     database.Character
+	Character     Character
 	Feats         []string
 	Classes       []Class
 	Class         string
@@ -535,7 +515,10 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "enter":
-				m.Character.Helmet = m.TextInput.Value()
+				i, ok := m.List.SelectedItem().(item)
+				if ok {
+					m.Character.Helmet = string(i)
+				}
 				return m, tea.Sequence(setupList("What cloak does your character have equipped?", &m.DND.Cloaks), switchState(promptCloak))
 			}
 		}
@@ -706,7 +689,7 @@ func (m CreateCharacterModel) Update(msg tea.Msg) (CreateCharacterModel, tea.Cmd
 		case tea.KeyMsg:
 			switch keypress := msg.String(); keypress {
 			case "tab":
-				m.Character = database.Character{}
+				m.Character = Character{}
 				m.ChoiceIndex = 0
 				return m, tea.Sequence(switchState(promptName), switchParentState(showHome))
 			case "esc":

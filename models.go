@@ -1,4 +1,4 @@
-package database
+package main
 
 type Option struct {
 	Name        string `gorm:"primaryKey"`

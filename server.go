@@ -1,16 +1,15 @@
-package server
+package main
 
 import (
+	"embed"
 	"fmt"
 	"io"
 	"net/http"
+	"path/filepath"
 	"text/template"
 
-	"github.com/BurntSushi/toml"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-
-	"github.com/thatstoasty/character-sheet-ui/pkg/database"
 )
 
 func GetIndex(c echo.Context) error {
@@ -18,14 +17,14 @@ func GetIndex(c echo.Context) error {
 }
 
 func GetCharacter(c echo.Context) error {
-	db := database.GetDatabaseSession()
+	db := getDatabaseSession()
 	characterInfo := GetCharacterInfo(db, c.QueryParam("name"))
 
 	return c.Render(http.StatusOK, "character", characterInfo)
 }
 
 func GetCharacterNames(c echo.Context) error {
-	db := database.GetDatabaseSession()
+	db := getDatabaseSession()
 
 	var names []string
 	db.Table("characters").Select("name").Scan(&names)
@@ -35,80 +34,30 @@ func GetCharacterNames(c echo.Context) error {
 
 type OptionWithDescription struct {
 	Name        string
+	Properties  string
 	Description string
 }
 
 func GetOptionDescription(c echo.Context) error {
-	db := database.GetDatabaseSession()
+	db := getDatabaseSession()
 
 	name := c.Request().Header["Hx-Trigger-Name"][0]
 
-	var option database.Option
-	db.Table("options").Select("description").Where("name = ?", name).First(&option)
+	var description string
+	db.Table("options").Select("description").Where("name = ?", name).Scan(&description)
 
-	return c.Render(http.StatusOK, "description", OptionWithDescription{name, option.Description})
+	return c.Render(http.StatusOK, "description", OptionWithDescription{name, "\n", description})
 }
 
 func GetItemDescription(c echo.Context) error {
-	db := database.GetDatabaseSession()
+	db := getDatabaseSession()
 
 	name := c.Request().Header["Hx-Trigger-Name"][0]
 
-	var option database.Option
-	db.Table("items").Select("description").Where("name = ?", name).First(&option)
+	var record Item
+	db.Table("items").Select("description", "properties").Where("name = ?", name).Scan(&record)
 
-	return c.Render(http.StatusOK, "description", OptionWithDescription{name, option.Description})
-}
-
-func SubmitCharacter(c echo.Context) error {
-	db := database.GetDatabaseSession()
-
-	fileHeader, err := c.FormFile("file")
-	if err != nil {
-		panic(err)
-	}
-
-	file, err := fileHeader.Open()
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	var hero database.Character
-	fileDecoder := toml.NewDecoder(file)
-	_, err = fileDecoder.Decode(&hero)
-	if err != nil {
-		panic(err)
-	}
-
-	db.Save(&database.Character{
-		Name:           hero.Name,
-		Class:          hero.Class,
-		HP:             hero.HP,
-		Proficiency:    hero.Proficiency,
-		Strength:       hero.Strength,
-		Dexterity:      hero.Dexterity,
-		Constitution:   hero.Constitution,
-		Intelligence:   hero.Intelligence,
-		Wisdom:         hero.Wisdom,
-		Charisma:       hero.Charisma,
-		Race:           hero.Race,
-		Feats:          hero.Feats,
-		Items:          hero.Items,
-		Helmet:         hero.Helmet,
-		Cloak:          hero.Cloak,
-		Jewelery1:      hero.Jewelery1,
-		Jewelery2:      hero.Jewelery2,
-		Jewelery3:      hero.Jewelery3,
-		Boots:          hero.Boots,
-		Gloves:         hero.Gloves,
-		MainHandWeapon: hero.MainHandWeapon,
-		OffHandWeapon:  hero.OffHandWeapon,
-	})
-
-	characterInfo := GetCharacterInfo(db, hero.Name)
-
-	return c.Render(http.StatusOK, "character", characterInfo)
+	return c.Render(http.StatusOK, "description", OptionWithDescription{name, record.Properties, record.Description})
 }
 
 type Template struct {
@@ -119,16 +68,26 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func Start() {
+//go:embed templates/*.html css/*.css content/*.png
+var content embed.FS
+
+func startWebServer() {
 	// Echo instance
 	server := echo.New()
 
+	absPath, _ := filepath.Abs("templates")
 	// Middleware
 	server.Use(
 		middleware.Logger(),
 		middleware.Recover(),
 		middleware.RequestID(),
-	)
+		middleware.StaticWithConfig(middleware.StaticConfig{
+			Root:       absPath,
+			Filesystem: http.FS(content),
+			Browse:     true,
+			IgnoreBase: true,
+		},
+		))
 
 	server.HTTPErrorHandler = func(err error, c echo.Context) {
 		// Take required information from error and context and send it to a service like New Relic
@@ -150,7 +109,6 @@ func Start() {
 	server.File("/content/gun.png", "content/gun.png")
 
 	//// character
-	server.POST("/character", SubmitCharacter)
 	server.GET("/character", GetCharacter)
 	server.GET("/character/names", GetCharacterNames)
 	server.GET("/option", GetOptionDescription)

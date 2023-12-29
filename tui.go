@@ -1,4 +1,4 @@
-package tui
+package main
 
 import (
 	"fmt"
@@ -6,41 +6,10 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/thatstoasty/character-sheet-ui/pkg/database"
-	"github.com/thatstoasty/character-sheet-ui/pkg/server"
 )
-
-func startServer() tea.Cmd {
-	return func() tea.Msg {
-		server.Start()
-
-		return "Server started!"
-	}
-}
-
-func switchState(state State) tea.Cmd {
-	return func() tea.Msg {
-		return SwitchStateMsg(state)
-	}
-}
-
-func switchParentState(state State) tea.Cmd {
-	return func() tea.Msg {
-		return SwitchParentStateMsg(state)
-	}
-}
-
-type SwitchStateMsg State
-type SwitchParentStateMsg State
 
 // Define what menu is being shown by using an state constants
 type State int
-
-func SetupDB() tea.Msg {
-	database.SetupDB()
-
-	return nil
-}
 
 // Assigns an incrementing value to each of these constants. 0, then 1, then 2, etc...
 const (
@@ -49,6 +18,36 @@ const (
 	showDeleteCharacter
 	showUpdateCharacter
 )
+
+func startServer() tea.Cmd {
+	return func() tea.Msg {
+		startWebServer()
+
+		return nil
+	}
+}
+
+type SwitchStateMsg State
+
+func switchState(state State) tea.Cmd {
+	return func() tea.Msg {
+		return SwitchStateMsg(state)
+	}
+}
+
+type SwitchParentStateMsg State
+
+func switchParentState(state State) tea.Cmd {
+	return func() tea.Msg {
+		return SwitchParentStateMsg(state)
+	}
+}
+
+func setupDatabase() tea.Msg {
+	seedDatabase()
+
+	return nil
+}
 
 type Model struct {
 	State           State
@@ -86,8 +85,8 @@ func initialModel() Model {
 
 func (m Model) Init() tea.Cmd {
 	return tea.Sequence(
-		SetupDB,
-		getCharacterNames,
+		setupDatabase,
+		fetchCharacterNames,
 	)
 }
 
@@ -178,7 +177,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func Run() {
+func startTUI() {
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)

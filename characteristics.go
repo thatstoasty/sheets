@@ -1,4 +1,4 @@
-package database
+package main
 
 var raceData = []Characteristic{
 	{Name: "Default", Type: "Race", Options: "Grapple|Shove|Dash|Disengage|Dodge|Use Object|Equip Item|Escape Grapple|Hide|Search|Ready Action"},

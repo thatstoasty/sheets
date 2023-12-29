@@ -1,6 +1,13 @@
-package database
+package main
 
 var armorData = []Item{
+	{Name: "None", Category: "Armor", Type: "Helmet", Description: ""},
+	{Name: "None", Category: "Armor", Type: "Jewelery", Description: ""},
+	{Name: "None", Category: "Armor", Type: "Cloak", Description: ""},
+	{Name: "None", Category: "Armor", Type: "Boots", Description: ""},
+	{Name: "None", Category: "Armor", Type: "Gloves", Description: ""},
+	{Name: "None", Category: "Armor", Type: "Armor", Description: ""},
+	{Name: "None", Category: "Armor", Type: "Helmet", Description: ""},
 	{Name: "Leather Helmet", Category: "Armor", Type: "Helmet", Description: "A leather helmet."},
 	{Name: "Bronze Ring", Category: "Armor", Type: "Jewelery", Description: "A bronze ring."},
 	{Name: "Leather Cloak", Category: "Armor", Type: "Cloak", Description: "A leather cloak."},
@@ -22,6 +29,7 @@ var armorData = []Item{
 }
 
 var meleeWeaponData = []Item{
+	{Name: "Unarmed", Category: "Weapon", Type: "Melee", Description: "1 Bludgeoning", Properties: "Light", Options: "Attack"},
 	{Name: "Rapier", Category: "Weapon", Type: "Melee", Description: "1d8 Piercing", Properties: "Finesse", Options: "Attack"},
 	{Name: "Rapier +1", Category: "Weapon", Type: "Melee", Description: "1d8+1 Piercing", Properties: "Finesse", Options: "Attack"},
 	{Name: "Rapier +2", Category: "Weapon", Type: "Melee", Description: "1d8+2 Piercing", Properties: "Finesse", Options: "Attack"},
